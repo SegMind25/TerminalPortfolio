@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SegMind25 - Linux & Gaming Content Creator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --terminal-green: #00ff41;
+            --terminal-bg: #0a0e1a;
+            --card-bg: #151923;
+            --accent-cyan: #00d9ff;
+        }
+        
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f35 100%);
+            color: white; 
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .terminal-font { font-family: 'Fira Code', monospace; }
+        
+        /* Terminal Animation */
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .cursor { 
+            animation: blink 1s infinite;
+            display: inline-block;
+            width: 8px;
+            height: 20px;
+            background: var(--terminal-green);
+            margin-left: 2px;
+        }
+        
+        /* Glitch Effect */
+        .glitch {
+            position: relative;
+            animation: glitch 3s infinite;
+        }
+        
+        @keyframes glitch {
+            0%, 90%, 100% { transform: translate(0); }
+            92% { transform: translate(-2px, 2px); }
+            94% { transform: translate(2px, -2px); }
+            96% { transform: translate(-2px, -2px); }
+            98% { transform: translate(2px, 2px); }
+        }
+        
+        /* Mobile Menu */
+        #mobile-menu { 
+            transition: transform 0.3s ease-in-out;
+            backdrop-filter: blur(10px);
+        }
+        .menu-open { transform: translateX(0) !important; }
+        
+        /* Active States */
+        .active-desktop { 
+            border-bottom: 2px solid var(--terminal-green); 
+            color: var(--terminal-green) !important;
+        }
+        .active-mobile { 
+            background: rgba(0, 255, 65, 0.1);
+            border-left: 4px solid var(--terminal-green);
+            color: var(--terminal-green) !important;
+        }
+        
+        /* Card Hover Effect */
+        .card-hover {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .card-hover::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 2px;
+            background: linear-gradient(45deg, var(--terminal-green), var(--accent-cyan));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .card-hover:hover::before {
+            opacity: 1;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+        }
+        
+        /* Scanline Effect */
+        .scanlines {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .scanlines::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 65, 0.03) 0px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+            animation: scan 8s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100%); }
+        }
+        
+        /* Button Glow */
+        .btn-glow {
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .btn-glow:hover {
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.6);
+            transform: scale(1.05);
+        }
+        
+        /* Stats Counter Animation */
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .stat-card {
+            animation: countUp 0.6s ease-out;
+        }
+        
+        /* Language Selector */
+        .lang-selector {
+            position: relative;
+        }
+        
+        .lang-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #151923;
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            border-radius: 12px;
+            margin-top: 8px;
+            min-width: 200px;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .lang-dropdown.show {
+            display: block;
+        }
+        
+        /* RTL Support */
+        [dir="rtl"] .active-mobile {
+            border-left: none;
+            border-right: 4px solid var(--terminal-green);
+        }
+        
+        /* Google Translate Widget */
+        #google_translate_element {
+            display: none;
+        }
+        
+        .goog-te-banner-frame {
+            display: none !important;
+        }
+        
+        body {
+            top: 0 !important;
+        }
+    </style>
+</head>
+<body class="scanlines">
+
+    <!-- Google Translate Element -->
+    <div id="google_translate_element"></div>
+
+    <!-- Navigation -->
+    <nav class="w-full max-w-7xl mx-auto flex justify-between items-center p-6 relative z-50">
+        <div class="terminal-font text-2xl font-bold">
+            <span class="text-green-400">seg@mind</span><span class="text-gray-500">:~$</span>
+            <span class="cursor"></span>
+        </div>
+        
+        <div id="desktop-links" class="hidden md:flex gap-8 items-center text-gray-400 text-sm terminal-font">
+            <a href="#home" class="nav-item transition hover:text-green-400 flex items-center gap-2">
+                <i class="fa-solid fa-house"></i> <span data-translate="nav_home">Home</span>
+            </a>
+            <a href="#channels" class="nav-item transition hover:text-green-400 flex items-center gap-2">
+                <i class="fa-brands fa-youtube"></i> <span data-translate="nav_channels">Channels</span>
+            </a>
+            <a href="#projects" class="nav-item transition hover:text-green-400 flex items-center gap-2">
+                <i class="fa-brands fa-github"></i> <span data-translate="nav_projects">Projects</span>
+            </a>
+            <a href="#community" class="nav-item transition hover:text-green-400 flex items-center gap-2">
+                <i class="fa-brands fa-discord"></i> <span data-translate="nav_community">Community</span>
+            </a>
+            
+            <!-- Language Selector -->
+            <div class="lang-selector">
+                <button id="lang-btn" class="flex items-center gap-2 px-4 py-2 bg-[#151923] border border-green-400/20 rounded-lg hover:border-green-400 transition">
+                    <i class="fa-solid fa-globe text-green-400"></i>
+                    <span id="current-lang">EN</span>
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                </button>
+                <div id="lang-dropdown" class="lang-dropdown">
+                    <button onclick="changeLanguage('en')" class="w-full text-left px-4 py-3 hover:bg-green-400/10 transition flex items-center gap-3">
+                        <span class="text-xl">🇬🇧</span> English
+                    </button>
+                    <button onclick="changeLanguage('ar')" class="w-full text-left px-4 py-3 hover:bg-green-400/10 transition flex items-center gap-3">
+                        <span class="text-xl">🇸🇦</span> العربية
+                    </button>
+                    <button onclick="changeLanguage('fr')" class="w-full text-left px-4 py-3 hover:bg-green-400/10 transition flex items-center gap-3">
+                        <span class="text-xl">🇫🇷</span> Français
+                    </button>
+                    <button onclick="changeLanguage('es')" class="w-full text-left px-4 py-3 hover:bg-green-400/10 transition flex items-center gap-3">
+                        <span class="text-xl">🇪🇸</span> Español
+                    </button>
+                    <button onclick="changeLanguage('de')" class="w-full text-left px-4 py-3 hover:bg-green-400/10 transition flex items-center gap-3">
+                        <span class="text-xl">🇩🇪</span> Deutsch
+                    </button>
+                    <button onclick="changeLanguage('zh-CN')" class="w-full text-left px-4 py-3 hover:bg-green-400/10 transition flex items-center gap-3">
+                        <span class="text-xl">🇨🇳</span> 中文
+                    </button>
+                    <button onclick="changeLanguage('ja')" class="w-full text-left px-4 py-3 hover:bg-green-400/10 transition flex items-center gap-3">
+                        <span class="text-xl">🇯🇵</span> 日本語
+                    </button>
+                    <button onclick="changeLanguage('ru')" class="w-full text-left px-4 py-3 hover:bg-green-400/10 transition flex items-center gap-3">
+                        <span class="text-xl">🇷🇺</span> Русский
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button id="open-menu" class="md:hidden text-green-400 text-2xl">
+            <i class="fa-solid fa-terminal"></i>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 bg-[#0a0e1a]/95 z-[100] -translate-x-full flex flex-col p-6 md:hidden">
+        <div class="flex justify-between items-center mb-10">
+            <div class="terminal-font text-xl font-bold text-green-400">seg@mind:~$</div>
+            <button id="close-menu" class="text-2xl text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="flex flex-col gap-3">
+            <a href="#home" class="mobile-item flex items-center justify-between p-4 rounded-xl text-gray-400 transition">
+                <i class="fa-solid fa-house text-green-400"></i> <span data-translate="nav_home">Home</span>
+            </a>
+            <a href="#channels" class="mobile-item flex items-center justify-between p-4 rounded-xl text-gray-400 transition">
+                <i class="fa-brands fa-youtube text-green-400"></i> <span data-translate="nav_channels">Channels</span>
+            </a>
+            <a href="#projects" class="mobile-item flex items-center justify-between p-4 rounded-xl text-gray-400 transition">
+                <i class="fa-brands fa-github text-green-400"></i> <span data-translate="nav_projects">Projects</span>
+            </a>
+            <a href="#community" class="mobile-item flex items-center justify-between p-4 rounded-xl text-gray-400 transition">
+                <i class="fa-brands fa-discord text-green-400"></i> <span data-translate="nav_community">Community</span>
+            </a>
+            
+            <!-- Mobile Language Selector -->
+            <div class="mt-4 p-4 bg-[#151923] rounded-xl border border-green-400/20">
+                <p class="text-xs text-gray-500 mb-3 terminal-font">SELECT LANGUAGE</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="changeLanguage('en')" class="px-3 py-2 bg-[#0a0e1a] rounded-lg hover:bg-green-400/10 transition text-sm">
+                        🇬🇧 EN
+                    </button>
+                    <button onclick="changeLanguage('ar')" class="px-3 py-2 bg-[#0a0e1a] rounded-lg hover:bg-green-400/10 transition text-sm">
+                        🇸🇦 AR
+                    </button>
+                    <button onclick="changeLanguage('fr')" class="px-3 py-2 bg-[#0a0e1a] rounded-lg hover:bg-green-400/10 transition text-sm">
+                        🇫🇷 FR
+                    </button>
+                    <button onclick="changeLanguage('es')" class="px-3 py-2 bg-[#0a0e1a] rounded-lg hover:bg-green-400/10 transition text-sm">
+                        🇪🇸 ES
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex items-center justify-center px-4 py-20">
+        <div class="max-w-6xl w-full text-center">
+            <div class="mb-8 inline-block">
+                <div class="w-32 h-32 md:w-48 md:h-48 rounded-full border-4 border-green-400 p-2 glitch relative overflow-hidden">
+                    <div class="w-full h-full rounded-full bg-gradient-to-br from-green-900/50 to-cyan-900/50 flex items-center justify-center">
+                        <i class="fa-solid fa-terminal text-6xl md:text-8xl text-green-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-bold mb-4 glitch">
+                <span class="text-green-400">Seg</span><span class="text-cyan-400">Mind25</span>
+            </h1>
+            
+            <div class="terminal-font text-xl md:text-2xl text-green-400 mb-6 h-8">
+                <span id="typed-text"></span><span class="cursor"></span>
+            </div>
+            
+            <p class="max-w-3xl mx-auto text-gray-400 text-base md:text-lg leading-relaxed mb-12" data-translate="hero_description">
+                Linux & Gaming Content Creator. Sharing my passion for technology and programming through educational and entertaining content. Join the community and explore the world of open-source software and gaming!
+            </p>
+            
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-4xl mx-auto">
+                <div class="stat-card bg-[#151923] border border-green-400/20 rounded-2xl p-6">
+                    <div class="text-3xl font-bold text-green-400 mb-2">2+</div>
+                    <div class="text-sm text-gray-400 terminal-font" data-translate="stat_channels">YouTube Channels</div>
+                </div>
+                <div class="stat-card bg-[#151923] border border-cyan-400/20 rounded-2xl p-6" style="animation-delay: 0.1s">
+                    <div class="text-3xl font-bold text-cyan-400 mb-2">10+</div>
+                    <div class="text-sm text-gray-400 terminal-font" data-translate="stat_projects">GitHub Projects</div>
+                </div>
+                <div class="stat-card bg-[#151923] border border-purple-400/20 rounded-2xl p-6" style="animation-delay: 0.2s">
+                    <div class="text-3xl font-bold text-purple-400 mb-2">1K+</div>
+                    <div class="text-sm text-gray-400 terminal-font" data-translate="stat_followers">Followers</div>
+                </div>
+                <div class="stat-card bg-[#151923] border border-red-400/20 rounded-2xl p-6" style="animation-delay: 0.3s">
+                    <div class="text-3xl font-bold text-red-400 mb-2">100+</div>
+                    <div class="text-sm text-gray-400 terminal-font" data-translate="stat_videos">Videos</div>
+                </div>
+            </div>
+            
+            <!-- CTA Buttons -->
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="https://github.com/SegMind25" target="_blank" class="btn-glow bg-green-600 px-8 py-4 rounded-xl terminal-font font-bold flex items-center gap-3 hover:bg-green-500">
+                    <i class="fa-brands fa-github text-xl"></i> GitHub
+                </a>
+                <a href="https://discord.gg/WeUYH3x9Cr" target="_blank" class="btn-glow bg-[#5865F2] px-8 py-4 rounded-xl terminal-font font-bold flex items-center gap-3 hover:bg-[#4752C4]">
+                    <i class="fa-brands fa-discord text-xl"></i> Discord Server
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Channels Section -->
+    <section id="channels" class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4">
+                <span class="text-green-400 terminal-font">&gt;_</span> <span data-translate="channels_title">Channels & Platforms</span>
+            </h2>
+            <p class="text-center text-gray-400 mb-16 terminal-font" data-translate="channels_subtitle">Follow me on my different platforms</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Gaming Channel -->
+                <div class="card-hover bg-[#151923] border border-white/5 rounded-3xl overflow-hidden p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <i class="fa-brands fa-youtube text-5xl text-red-500"></i>
+                        <span class="terminal-font text-xs text-green-400 bg-green-400/10 px-3 py-1 rounded-full" data-translate="tag_gaming">GAMING</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2 text-white">SegMind25</h3>
+                    <p class="text-gray-400 text-sm mb-4" data-translate="channel_gaming_desc">Gaming content, walkthroughs, and live streams</p>
+                    <div class="flex items-center gap-2 text-xs text-gray-500 mb-6 terminal-font">
+                        <i class="fa-solid fa-users"></i>
+                        <span data-translate="subscribers">Subscribers</span>: <span class="text-green-400">500+</span>
+                    </div>
+                    <a href="https://www.youtube.com/@SegMind25" target="_blank" class="block w-full bg-red-600 text-center py-3 rounded-xl font-bold hover:bg-red-500 transition">
+                        <i class="fa-brands fa-youtube"></i> <span data-translate="visit_channel">Visit Channel</span>
+                    </a>
+                </div>
+
+                <!-- Linux & Coding Channel -->
+                <div class="card-hover bg-[#151923] border border-white/5 rounded-3xl overflow-hidden p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <i class="fa-brands fa-youtube text-5xl text-red-500"></i>
+                        <span class="terminal-font text-xs text-cyan-400 bg-cyan-400/10 px-3 py-1 rounded-full" data-translate="tag_linux">LINUX & CODE</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2 text-white">SegError</h3>
+                    <p class="text-gray-400 text-sm mb-4" data-translate="channel_linux_desc">Linux tutorials, programming, and tech reviews</p>
+                    <div class="flex items-center gap-2 text-xs text-gray-500 mb-6 terminal-font">
+                        <i class="fa-solid fa-users"></i>
+                        <span data-translate="subscribers">Subscribers</span>: <span class="text-cyan-400">300+</span>
+                    </div>
+                    <a href="https://www.youtube.com/@SegError" target="_blank" class="block w-full bg-red-600 text-center py-3 rounded-xl font-bold hover:bg-red-500 transition">
+                        <i class="fa-brands fa-youtube"></i> <span data-translate="visit_channel">Visit Channel</span>
+                    </a>
+                </div>
+
+                <!-- TikTok -->
+                <div class="card-hover bg-[#151923] border border-white/5 rounded-3xl overflow-hidden p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <i class="fa-brands fa-tiktok text-5xl text-white"></i>
+                        <span class="terminal-font text-xs text-purple-400 bg-purple-400/10 px-3 py-1 rounded-full" data-translate="tag_shorts">SHORT CONTENT</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2 text-white">@segmind25</h3>
+                    <p class="text-gray-400 text-sm mb-4" data-translate="tiktok_desc">Quick tips, funny moments, and tech shorts</p>
+                    <div class="flex items-center gap-2 text-xs text-gray-500 mb-6 terminal-font">
+                        <i class="fa-solid fa-heart"></i>
+                        <span data-translate="followers">Followers</span>: <span class="text-purple-400">200+</span>
+                    </div>
+                    <a href="https://www.tiktok.com/@segmind25" target="_blank" class="block w-full bg-gradient-to-r from-purple-600 to-pink-600 text-center py-3 rounded-xl font-bold hover:from-purple-500 hover:to-pink-500 transition">
+                        <i class="fa-brands fa-tiktok"></i> <span data-translate="follow_tiktok">Follow on TikTok</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-20 px-4 bg-[#0a0e1a]/50">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4">
+                <span class="text-green-400 terminal-font">&gt;_</span> <span data-translate="projects_title">GitHub Projects</span>
+            </h2>
+            <p class="text-center text-gray-400 mb-16 terminal-font" data-translate="projects_subtitle">Open-source projects and contributions</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <!-- Project Card Template -->
+                <div class="card-hover bg-[#151923] border border-white/5 rounded-3xl p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-brands fa-github text-3xl text-green-400"></i>
+                            <div>
+                                <h3 class="text-xl font-bold text-white terminal-font">Linux-Scripts</h3>
+                                <p class="text-xs text-gray-500 terminal-font">Shell • MIT License</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-star text-yellow-400"></i>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-6" data-translate="project_scripts_desc">Collection of useful Linux automation scripts and tools</p>
+                    <div class="flex items-center gap-4 text-xs text-gray-500 mb-6 terminal-font">
+                        <span class="flex items-center gap-1">
+                            <i class="fa-solid fa-code-branch"></i> 5 <span data-translate="forks">forks</span>
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i class="fa-solid fa-star"></i> 15 <span data-translate="stars">stars</span>
+                        </span>
+                    </div>
+                    <a href="https://github.com/SegMind25" target="_blank" class="block w-full bg-green-600/20 border border-green-400/30 text-center py-3 rounded-xl font-bold hover:bg-green-600/30 transition terminal-font">
+                        <i class="fa-brands fa-github"></i> <span data-translate="view_repo">View Repository</span>
+                    </a>
+                </div>
+
+                <div class="card-hover bg-[#151923] border border-white/5 rounded-3xl p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-brands fa-github text-3xl text-cyan-400"></i>
+                            <div>
+                                <h3 class="text-xl font-bold text-white terminal-font">GameDev-Tools</h3>
+                                <p class="text-xs text-gray-500 terminal-font">Python • GPL-3.0</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-star text-yellow-400"></i>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-6" data-translate="project_gamedev_desc">Game development utilities and helper scripts</p>
+                    <div class="flex items-center gap-4 text-xs text-gray-500 mb-6 terminal-font">
+                        <span class="flex items-center gap-1">
+                            <i class="fa-solid fa-code-branch"></i> 3 <span data-translate="forks">forks</span>
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i class="fa-solid fa-star"></i> 12 <span data-translate="stars">stars</span>
+                        </span>
+                    </div>
+                    <a href="https://github.com/SegMind25" target="_blank" class="block w-full bg-cyan-600/20 border border-cyan-400/30 text-center py-3 rounded-xl font-bold hover:bg-cyan-600/30 transition terminal-font">
+                        <i class="fa-brands fa-github"></i> <span data-translate="view_repo">View Repository</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <a href="https://github.com/SegMind25" target="_blank" class="inline-flex items-center gap-3 bg-[#151923] border border-green-400/30 px-8 py-4 rounded-xl hover:border-green-400 transition terminal-font font-bold">
+                    <i class="fa-brands fa-github text-2xl text-green-400"></i>
+                    <span data-translate="view_all_projects">View All Projects on GitHub</span>
+                    <i class="fa-solid fa-arrow-right text-green-400"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Section -->
+    <section id="community" class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-4">
+                <span class="text-green-400 terminal-font">&gt;_</span> <span data-translate="community_title">Join Our Community</span>
+            </h2>
+            <p class="text-center text-gray-400 mb-16 terminal-font" data-translate="community_subtitle">Connect with like-minded tech enthusiasts</p>
+            
+            <div class="max-w-4xl mx-auto">
+                <!-- Discord Card -->
+                <div class="card-hover bg-gradient-to-br from-[#5865F2]/20 to-[#151923] border border-[#5865F2]/30 rounded-3xl p-8 md:p-12 mb-8">
+                    <div class="flex flex-col md:flex-row items-center gap-8">
+                        <div class="flex-shrink-0">
+                            <i class="fa-brands fa-discord text-8xl text-[#5865F2]"></i>
+                        </div>
+                        <div class="flex-1 text-center md:text-left">
+                            <h3 class="text-3xl font-bold mb-3 text-white" data-translate="discord_title">Discord Server</h3>
+                            <p class="text-gray-300 mb-6" data-translate="discord_desc">Join our active community! Share your projects, get help with Linux, discuss gaming, and connect with other members.</p>
+                            <div class="flex flex-wrap gap-4 justify-center md:justify-start mb-6">
+                                <div class="bg-[#0a0e1a]/50 px-4 py-2 rounded-lg">
+                                    <i class="fa-solid fa-users text-green-400 mr-2"></i>
+                                    <span class="terminal-font text-sm">150+ <span data-translate="members">Members</span></span>
+                                </div>
+                                <div class="bg-[#0a0e1a]/50 px-4 py-2 rounded-lg">
+                                    <i class="fa-solid fa-comments text-cyan-400 mr-2"></i>
+                                    <span class="terminal-font text-sm" data-translate="active_chat">Active Chat</span>
+                                </div>
+                                <div class="bg-[#0a0e1a]/50 px-4 py-2 rounded-lg">
+                                    <i class="fa-solid fa-headset text-purple-400 mr-2"></i>
+                                    <span class="terminal-font text-sm" data-translate="voice_channels">Voice Channels</span>
+                                </div>
+                            </div>
+                            <a href="https://discord.gg/WeUYH3x9Cr" target="_blank" class="inline-flex items-center gap-3 bg-[#5865F2] px-8 py-4 rounded-xl font-bold hover:bg-[#4752C4] transition">
+                                <i class="fa-brands fa-discord text-xl"></i>
+                                <span data-translate="join_discord">Join Discord Server</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Links Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <a href="https://github.com/SegMind25" target="_blank" class="card-hover bg-[#151923] border border-white/5 rounded-2xl p-6 text-center hover:border-green-400/50 transition">
+                        <i class="fa-brands fa-github text-5xl text-green-400 mb-4"></i>
+                        <h4 class="text-lg font-bold mb-2">GitHub</h4>
+                        <p class="text-sm text-gray-400 terminal-font" data-translate="github_follow">Follow my repos</p>
+                    </a>
+                    
+                    <a href="https://www.youtube.com/@SegMind25" target="_blank" class="card-hover bg-[#151923] border border-white/5 rounded-2xl p-6 text-center hover:border-red-400/50 transition">
+                        <i class="fa-brands fa-youtube text-5xl text-red-500 mb-4"></i>
+                        <h4 class="text-lg font-bold mb-2">YouTube</h4>
+                        <p class="text-sm text-gray-400 terminal-font" data-translate="youtube_subscribe">Subscribe now</p>
+                    </a>
+                    
+                    <a href="https://www.tiktok.com/@segmind25" target="_blank" class="card-hover bg-[#151923] border border-white/5 rounded-2xl p-6 text-center hover:border-purple-400/50 transition">
+                        <i class="fa-brands fa-tiktok text-5xl text-white mb-4"></i>
+                        <h4 class="text-lg font-bold mb-2">TikTok</h4>
+                        <p class="text-sm text-gray-400 terminal-font" data-translate="tiktok_follow">Follow for shorts</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 bg-[#0a0e1a]/80 border-t border-green-400/10">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="terminal-font text-xl font-bold mb-4">
+                <span class="text-green-400">seg@mind</span><span class="text-gray-500">:~$</span>
+            </div>
+            <p class="text-gray-500 text-sm mb-6 terminal-font">
+                © 2026 SegMind25. <span data-translate="footer_rights">All rights reserved</span>.
+            </p>
+            <div class="flex justify-center gap-6">
+                <a href="https://github.com/SegMind25" target="_blank" class="text-gray-400 hover:text-green-400 transition text-2xl">
+                    <i class="fa-brands fa-github"></i>
+                </a>
+                <a href="https://www.youtube.com/@SegMind25" target="_blank" class="text-gray-400 hover:text-red-500 transition text-2xl">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+                <a href="https://www.youtube.com/@SegError" target="_blank" class="text-gray-400 hover:text-red-500 transition text-2xl">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+                <a href="https://discord.gg/WeUYH3x9Cr" target="_blank" class="text-gray-400 hover:text-[#5865F2] transition text-2xl">
+                    <i class="fa-brands fa-discord"></i>
+                </a>
+                <a href="https://www.tiktok.com/@segmind25" target="_blank" class="text-gray-400 hover:text-white transition text-2xl">
+                    <i class="fa-brands fa-tiktok"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    
+    <script>
+        // Translation data
+        const translations = {
+            en: {
+                nav_home: "Home",
+                nav_channels: "Channels",
+                nav_projects: "Projects",
+                nav_community: "Community",
+                hero_description: "Linux & Gaming Content Creator. Sharing my passion for technology and programming through educational and entertaining content. Join the community and explore the world of open-source software and gaming!",
+                stat_channels: "YouTube Channels",
+                stat_projects: "GitHub Projects",
+                stat_followers: "Followers",
+                stat_videos: "Videos",
+                channels_title: "Channels & Platforms",
+                channels_subtitle: "Follow me on my different platforms",
+                tag_gaming: "GAMING",
+                tag_linux: "LINUX & CODE",
+                tag_shorts: "SHORT CONTENT",
+                channel_gaming_desc: "Gaming content, walkthroughs, and live streams",
+                channel_linux_desc: "Linux tutorials, programming, and tech reviews",
+                tiktok_desc: "Quick tips, funny moments, and tech shorts",
+                subscribers: "Subscribers",
+                followers: "Followers",
+                visit_channel: "Visit Channel",
+                follow_tiktok: "Follow on TikTok",
+                projects_title: "GitHub Projects",
+                projects_subtitle: "Open-source projects and contributions",
+                project_scripts_desc: "Collection of useful Linux automation scripts and tools",
+                project_gamedev_desc: "Game development utilities and helper scripts",
+                forks: "forks",
+                stars: "stars",
+                view_repo: "View Repository",
+                view_all_projects: "View All Projects on GitHub",
+                community_title: "Join Our Community",
+                community_subtitle: "Connect with like-minded tech enthusiasts",
+                discord_title: "Discord Server",
+                discord_desc: "Join our active community! Share your projects, get help with Linux, discuss gaming, and connect with other members.",
+                members: "Members",
+                active_chat: "Active Chat",
+                voice_channels: "Voice Channels",
+                join_discord: "Join Discord Server",
+                github_follow: "Follow my repos",
+                youtube_subscribe: "Subscribe now",
+                tiktok_follow: "Follow for shorts",
+                footer_rights: "All rights reserved"
+            },
+            ar: {
+                nav_home: "الرئيسية",
+                nav_channels: "القنوات",
+                nav_projects: "المشاريع",
+                nav_community: "المجتمع",
+                hero_description: "صانع محتوى لينكس وألعاب. أشارك شغفي بالتقنية والبرمجة من خلال محتوى تعليمي وترفيهي. انضم إلى المجتمع واستكشف عالم البرمجيات الحرة والألعاب!",
+                stat_channels: "قنوات يوتيوب",
+                stat_projects: "مشاريع GitHub",
+                stat_followers: "متابع",
+                stat_videos: "فيديو",
+                channels_title: "القنوات والمنصات",
+                channels_subtitle: "تابعني على منصاتي المختلفة",
+                tag_gaming: "ألعاب",
+                tag_linux: "لينكس وبرمجة",
+                tag_shorts: "محتوى قصير",
+                channel_gaming_desc: "محتوى ألعاب، شروحات، وبث مباشر",
+                channel_linux_desc: "دروس لينكس، برمجة، ومراجعات تقنية",
+                tiktok_desc: "نصائح سريعة، لحظات مضحكة، ومقاطع تقنية",
+                subscribers: "مشترك",
+                followers: "متابع",
+                visit_channel: "زيارة القناة",
+                follow_tiktok: "متابعة على تيك توك",
+                projects_title: "مشاريع GitHub",
+                projects_subtitle: "مشاريع مفتوحة المصدر ومساهمات",
+                project_scripts_desc: "مجموعة من سكريبتات أتمتة لينكس المفيدة",
+                project_gamedev_desc: "أدوات ومساعدات تطوير الألعاب",
+                forks: "نسخ",
+                stars: "نجوم",
+                view_repo: "عرض المستودع",
+                view_all_projects: "عرض جميع المشاريع على GitHub",
+                community_title: "انضم إلى مجتمعنا",
+                community_subtitle: "تواصل مع عشاق التقنية",
+                discord_title: "سيرفر Discord",
+                discord_desc: "انضم إلى مجتمعنا النشط! شارك مشاريعك، احصل على مساعدة في لينكس، ناقش الألعاب، وتواصل مع الأعضاء.",
+                members: "عضو",
+                active_chat: "دردشة نشطة",
+                voice_channels: "قنوات صوتية",
+                join_discord: "انضم إلى Discord",
+                github_follow: "تابع مشاريعي",
+                youtube_subscribe: "اشترك الآن",
+                tiktok_follow: "تابع للمقاطع القصيرة",
+                footer_rights: "جميع الحقوق محفوظة"
+            }
+        };
+
+        // Initialize Google Translate
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,ar,fr,es,de,zh-CN,ja,ru,pt,it,ko,hi,tr,nl,pl,sv',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+
+        // Change Language Function
+        function changeLanguage(lang) {
+            // Update UI direction for RTL languages
+            if (lang === 'ar') {
+                document.documentElement.setAttribute('dir', 'rtl');
+                document.documentElement.setAttribute('lang', 'ar');
+            } else {
+                document.documentElement.setAttribute('dir', 'ltr');
+                document.documentElement.setAttribute('lang', lang);
+            }
+
+            // Update current language display
+            const langCodes = {
+                'en': 'EN', 'ar': 'AR', 'fr': 'FR', 'es': 'ES',
+                'de': 'DE', 'zh-CN': 'CN', 'ja': 'JP', 'ru': 'RU'
+            };
+            document.getElementById('current-lang').textContent = langCodes[lang] || 'EN';
+
+            // Apply manual translations for EN and AR
+            if (translations[lang]) {
+                document.querySelectorAll('[data-translate]').forEach(elem => {
+                    const key = elem.getAttribute('data-translate');
+                    if (translations[lang][key]) {
+                        elem.textContent = translations[lang][key];
+                    }
+                });
+            }
+
+            // Trigger Google Translate for other languages
+            if (lang !== 'en' && lang !== 'ar') {
+                const translateSelect = document.querySelector('.goog-te-combo');
+                if (translateSelect) {
+                    translateSelect.value = lang;
+                    translateSelect.dispatchEvent(new Event('change'));
+                }
+            }
+
+            // Close dropdown
+            document.getElementById('lang-dropdown').classList.remove('show');
+            document.getElementById('mobile-menu').classList.remove('menu-open');
+        }
+
+        // Typed.js Animation
+        const typedStrings = {
+            en: ['Linux Expert', 'Game Developer', 'Content Creator', 'Open Source Advocate'],
+            ar: ['خبير لينكس', 'مطور ألعاب', 'صانع محتوى', 'مدافع عن المصادر المفتوحة']
+        };
+
+        let typed;
+        function initTyped(lang = 'en') {
+            if (typed) typed.destroy();
+            typed = new Typed('#typed-text', {
+                strings: typedStrings[lang] || typedStrings.en,
+                typeSpeed: 70,
+                backSpeed: 50,
+                loop: true
+            });
+        }
+
+        // Mobile Menu
+        const menu = document.getElementById('mobile-menu');
+        document.getElementById('open-menu').onclick = () => menu.classList.add('menu-open');
+        document.getElementById('close-menu').onclick = () => menu.classList.remove('menu-open');
+
+        // Language Dropdown
+        document.getElementById('lang-btn').onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('lang-dropdown').classList.toggle('show');
+        };
+
+        document.addEventListener('click', () => {
+            document.getElementById('lang-dropdown').classList.remove('show');
+        });
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    menu.classList.remove('menu-open');
+                }
+            });
+        });
+
+        // Initialize
+        window.onload = () => {
+            initTyped('en');
+            
+            // Detect browser language
+            const browserLang = navigator.language.split('-')[0];
+            if (browserLang === 'ar') {
+                changeLanguage('ar');
+                initTyped('ar');
+            }
+        };
+    </script>
+</body>
+</html>
