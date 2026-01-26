@@ -3,204 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SegMind25 | Virtual Minishell v5.0</title>
+    <title>SegMind25 | Virtual Kernel v4.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
-        :root { --accent: #22d3ee; --bg: #020617; --terminal-bg: #0b1120; }
-        body { font-family: 'Fira Code', monospace; background-color: var(--bg); color: #94a3b8; overflow: hidden; }
-        .minishell-container { box-shadow: 0 0 80px rgba(6, 182, 212, 0.08); border: 1px solid #1e293b; }
-        .cursor { display: inline-block; width: 10px; height: 1.2em; background: var(--accent); animation: blink 1s infinite; vertical-align: middle; }
+        body { font-family: 'Fira Code', monospace; background-color: #020617; color: #94a3b8; overflow: hidden; }
+        .terminal-container { box-shadow: 0 0 60px rgba(6, 182, 212, 0.1); border: 1px solid rgba(30, 41, 59, 0.7); }
+        .cursor { display: inline-block; width: 10px; height: 1.2em; background: #22d3ee; animation: blink 1s infinite; vertical-align: middle; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        input:focus { outline: none; border: none; box-shadow: none; }
-        .syntax-cmd { color: #f87171; font-weight: 600; }
-        .syntax-arg { color: #fbbf24; }
-        #output::-webkit-scrollbar { width: 4px; }
+        #output::-webkit-scrollbar { width: 5px; }
         #output::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        input:focus { outline: none; border: none; box-shadow: none; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <div class="w-full max-w-5xl h-[90vh] minishell-container bg-[#0b1120]/95 rounded-2xl flex flex-col overflow-hidden backdrop-blur-xl">
+    <div class="w-full max-w-5xl h-[85vh] terminal-container bg-[#0b1120]/95 rounded-xl flex flex-col backdrop-blur-md">
         
-        <div class="bg-slate-900/90 px-5 py-4 flex items-center justify-between border-b border-slate-800">
-            <div class="flex gap-2.5">
-                <div class="w-3.5 h-3.5 rounded-full bg-red-500/20 border border-red-500/50 hover:bg-red-500/50 transition-all cursor-pointer"></div>
-                <div class="w-3.5 h-3.5 rounded-full bg-amber-500/20 border border-amber-500/50 hover:bg-amber-500/50 transition-all cursor-pointer"></div>
-                <div class="w-3.5 h-3.5 rounded-full bg-emerald-500/20 border border-emerald-500/50 hover:bg-emerald-500/50 transition-all cursor-pointer"></div>
+        <div class="bg-slate-900/80 px-4 py-3 flex items-center justify-between border-b border-slate-800">
+            <div class="flex gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500/40"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-500/40"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500/40"></div>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2 bg-slate-950/80 px-4 py-1.5 rounded-full border border-slate-800 shadow-inner">
-                    <i class="fa-solid fa-terminal text-cyan-400 text-[10px]"></i>
-                    <span class="text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold">segmind25@minishell: ~</span>
-                </div>
+            <div class="flex items-center gap-3 bg-slate-950 px-4 py-1 rounded-md border border-slate-800">
+                <i class="fa-solid fa-microchip text-cyan-500 text-xs"></i>
+                <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">SegMind25-Kernel-LTS</span>
             </div>
-            <div class="text-slate-600 text-xs">v5.0.1-stable</div>
+            <div class="w-12"></div>
         </div>
 
-        <div id="output" class="flex-1 overflow-y-auto p-8 space-y-4 text-sm md:text-base selection:bg-cyan-500/20">
-            <div id="boot-sequence">
-                <p class="text-cyan-500 leading-none mb-6">
-                    [ OK ] Starting SegMind25 Virtual Kernel...<br>
-                    [ OK ] Mounting virtual filesystems...<br>
-                    [ OK ] Initializing network stack...<br>
-                    [ OK ] Loading shell binaries...
-                </p>
-                <div class="mb-10 animate-pulse">
-                    <pre class="text-white text-[8px] md:text-[11px] font-bold">
-  ███████╗███████╗ ██████╗ ███╗   ███╗██╗███╗   ██╗██████╗ 
-  ██╔════╝██╔════╝██╔════╝ ████╗ ████║██║████╗  ██║██╔══██╗
-  ███████╗█████╗  ██║  ███╗██╔████╔██║██║██╔██╗ ██║██║  ██║
-  ╚════██║██╔══╝  ██║   ██║██║╚██╔╝██║██║██║╚██╗██║██║  ██║
-  ███████║███████╗╚██████╔╝██║ ╚═╝ ██║██║██║ ╚████║██████╔╝
-  ╚══════╝╚══════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚══════╝</pre>
+        <div id="output" class="flex-1 overflow-y-auto p-6 space-y-2 text-sm md:text-base scroll-smooth">
+            <div id="terminal-history">
+                <div class="mb-8">
+                    <pre class="text-cyan-500 text-[7px] md:text-[10px] leading-none mb-4 opacity-80">
+███████╗███████╗ ██████╗ ███╗   ███╗██╗███╗   ██╗██████╗ ██████╗ ███████╗
+██╔════╝██╔════╝██╔════╝ ████╗ ████║██║████╗  ██║██╔══██╗╚════██╗██╔════╝
+███████╗█████╗  ██║  ███╗██╔████╔██║██║██╔██╗ ██║██║  ██║ █████╔╝███████╗
+╚════██║██╔══╝  ██║   ██║██║╚██╔╝██║██║██║╚██╗██║██║  ██║██╔═══╝ ╚════██║
+███████║███████╗╚██████╔╝██║ ╚═╝ ██║██║██║ ╚████║██████╔╝███████╗███████║
+╚══════╝╚══════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚══════╝</pre>
+                    <p class="text-white font-medium">Session initialized: <span id="session-date" class="text-slate-500"></span></p>
+                    <p class="text-slate-500 mt-2">Type <span class="text-cyan-400">'help'</span> for command list. Full BASH support enabled.</p>
                 </div>
             </div>
 
-            <div id="history"></div>
-
-            <div class="flex items-center flex-wrap gap-x-3 pt-2">
-                <div class="flex items-center gap-1">
-                    <span class="text-emerald-400 font-bold">segmind25</span>
-                    <span class="text-slate-500">@</span>
-                    <span class="text-cyan-400 font-bold">linux</span>
-                </div>
-                <span class="text-white font-bold opacity-50">~ $</span>
-                <div class="relative flex-1 min-w-[200px]">
-                    <input type="text" id="shell-input" 
-                        class="w-full bg-transparent border-none text-white font-medium focus:ring-0 p-0" 
-                        autofocus autocomplete="off" spellcheck="false">
-                    <div id="hint-overlay" class="absolute left-0 top-0 text-slate-700 -z-10 pointer-events-none"></div>
+            <div class="flex items-center flex-wrap gap-x-2 pb-10">
+                <span class="text-emerald-400 font-bold">segmind@linux</span>
+                <span class="text-slate-400">:</span>
+                <span class="text-cyan-400 font-bold">~</span>
+                <span class="text-white font-bold">$</span>
+                <div class="relative flex-1 min-w-[150px]">
+                    <input type="text" id="bash-input" class="w-full bg-transparent border-none text-white font-medium focus:ring-0 p-0" autofocus autocomplete="off" spellcheck="false">
+                    <div id="autocomplete-hint" class="absolute left-0 top-0 text-slate-700 -z-10 pointer-events-none"></div>
                 </div>
                 <span class="cursor"></span>
             </div>
         </div>
 
-        <div class="bg-slate-900 px-6 py-2.5 flex items-center justify-between border-t border-slate-800 text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
-            <div class="flex gap-6">
-                <span><i class="fa-solid fa-code-branch text-cyan-500 mr-2"></i>master*</span>
-                <span><i class="fa-solid fa-server text-emerald-500 mr-2"></i>online</span>
-                <span><i class="fa-solid fa-user-shield text-amber-500 mr-2"></i>visitor</span>
+        <div class="bg-slate-900/80 px-4 py-2 flex items-center justify-between border-t border-slate-800 text-[10px] text-slate-500 tracking-wider">
+            <div class="flex items-center gap-4">
+                <span><i class="fa-solid fa-code-branch mr-1"></i> main*</span>
+                <span><i class="fa-solid fa-circle-check mr-1 text-emerald-500"></i> stable</span>
             </div>
-            <div>&copy; 2024 SEGMIND25 - SYSTEM INNOVATION</div>
+            <div class="font-medium uppercase">
+                &copy; 2024 <span class="text-slate-300">SegMind25</span>. All Rights Reserved.
+            </div>
+            <div class="flex items-center gap-4">
+                <span>UTF-8</span>
+                <span>Linux x86_64</span>
+            </div>
         </div>
     </div>
 
     <script>
-        const input = document.getElementById('shell-input');
-        const history = document.getElementById('history');
+        const input = document.getElementById('bash-input');
         const output = document.getElementById('output');
-        const hint = document.getElementById('hint-overlay');
+        const historyContainer = document.getElementById('terminal-history');
+        const hint = document.getElementById('autocomplete-hint');
+        document.getElementById('session-date').innerText = new Date().toLocaleString();
 
         let cmdHistory = [];
         let historyIdx = -1;
+        const commands = ['help', 'ls', 'whoami', 'gaming', 'coding', 'tiktok', 'discord', 'projects', 'clear', 'date', 'neofetch'];
 
-        // COMMAND BINARIES DEFINITION
         const bin = {
-            help: () => "Core Binaries: ls, cd, cat, whoami, clear, neofetch, exit, gaming, coding, projects, tiktok, discord",
-            ls: () => "<div class='flex gap-4 text-emerald-400'><span>📁 gaming/</span> <span>📁 coding/</span> <span>📁 projects/</span> <span>📄 readme.md</span></div>",
-            whoami: () => "SegMind25 - Senior Content Creator & Frontend Architect",
-            neofetch: () => `<div class="flex gap-4">
-                <div class="text-cyan-500 font-black">S25</div>
-                <div><span class="text-cyan-400">OS:</span> SegMind Minishell v5.0<br><span class="text-cyan-400">Shell:</span> custom-web-bash<br><span class="text-cyan-400">Theme:</span> Avant-Garde Dark</div>
-            </div>`,
-            date: () => new Date().toLocaleString(),
-            gaming: () => { window.open('https://www.youtube.com/@SegMind25', '_blank'); return "Executing: Redirecting to YouTube Gaming..."; },
-            coding: () => { window.open('https://www.youtube.com/@SegError', '_blank'); return "Executing: Redirecting to SegError Coding..."; },
-            tiktok: () => { window.open('https://www.tiktok.com/@segmind25', '_blank'); return "Executing: Redirecting to TikTok..."; },
-            discord: () => { window.open('https://discord.gg/WeUYH3x9Cr', '_blank'); return "Executing: Joining Discord Server..."; },
-            projects: () => { window.open('https://github.com/SegMind25', '_blank'); return "Executing: Opening GitHub Portfolio..."; },
-            cat: (arg) => arg === 'readme.md' ? "This is a custom-built Minishell. Use standard bash commands to navigate. Built by SegMind25." : `cat: ${arg || 'null'}: No such file`
+            help: () => "Available: ls, gaming, coding, tiktok, discord, projects, whoami, clear, neofetch",
+            ls: () => "<span class='text-emerald-400'>gaming/ coding/ projects/ tiktok.lnk discord.lnk README.md</span>",
+            whoami: () => "SegMind25 — Linux Enthusiast & Content Architect",
+            neofetch: () => "OS: SegMindOS 4.0<br>Kernel: Web-Bash 1.0.2<br>Shell: fira-code-shell",
+            date: () => new Date().toString()
         };
 
-        const commands = Object.keys(bin);
+        const urls = {
+            gaming: "https://www.youtube.com/@SegMind25",
+            coding: "https://www.youtube.com/@SegError",
+            tiktok: "https://www.tiktok.com/@segmind25",
+            discord: "https://discord.gg/WeUYH3x9Cr",
+            projects: "https://github.com/SegMind25"
+        };
 
-        // INPUT LOGIC
         input.addEventListener('input', () => {
             const val = input.value.toLowerCase();
             hint.innerText = val ? (commands.find(c => c.startsWith(val)) || '') : '';
         });
 
         input.addEventListener('keydown', (e) => {
-            // Tab Completion
             if (e.key === 'Tab') {
                 e.preventDefault();
                 const match = commands.find(c => c.startsWith(input.value.toLowerCase()));
                 if (match) { input.value = match; hint.innerText = ''; }
             }
-
-            // Command History (Up/Down)
+            if (e.ctrlKey && e.key === 'l') { e.preventDefault(); historyContainer.innerHTML = ''; }
+            if (e.key === 'Enter') {
+                const cmd = input.value.trim().toLowerCase();
+                if (cmd) execute(cmd);
+                input.value = ''; hint.innerText = '';
+            }
             if (e.key === 'ArrowUp') {
-                e.preventDefault();
                 if (historyIdx < cmdHistory.length - 1) {
                     historyIdx++;
                     input.value = cmdHistory[cmdHistory.length - 1 - historyIdx];
                 }
             }
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                if (historyIdx > 0) {
-                    historyIdx--;
-                    input.value = cmdHistory[cmdHistory.length - 1 - historyIdx];
-                } else {
-                    historyIdx = -1;
-                    input.value = '';
-                }
-            }
-
-            // Execute
-            if (e.key === 'Enter') {
-                const fullCmd = input.value.trim().toLowerCase();
-                const [cmd, ...args] = fullCmd.split(' ');
-                
-                if (fullCmd) {
-                    cmdHistory.push(fullCmd);
-                    historyIdx = -1;
-                    execute(cmd, args.join(' '));
-                }
-                input.value = '';
-                hint.innerText = '';
-            }
-
-            // Clear (Ctrl + L)
-            if (e.ctrlKey && e.key === 'l') {
-                e.preventDefault();
-                history.innerHTML = '';
-                document.getElementById('boot-sequence').style.display = 'none';
-            }
         });
 
-        function execute(cmd, arg) {
+        function execute(cmd) {
+            cmdHistory.push(cmd);
             const line = document.createElement('div');
-            line.innerHTML = `
-                <div class="flex gap-3 text-xs md:text-sm mt-4">
-                    <span class="text-emerald-400 font-bold">➜</span>
-                    <span class="text-cyan-400 font-bold">~</span>
-                    <span class="text-white font-medium">${cmd} ${arg}</span>
-                </div>`;
-            history.appendChild(line);
+            line.innerHTML = `<div class="mt-4 flex gap-2"><span class="text-emerald-400 font-bold">➜</span> <span class="text-white">${cmd}</span></div>`;
+            historyContainer.appendChild(line);
 
-            if (cmd === 'clear') {
-                history.innerHTML = '';
-                document.getElementById('boot-sequence').style.display = 'none';
-                return;
-            }
-
+            if (cmd === 'clear') { historyContainer.innerHTML = ''; return; }
+            
             const response = document.createElement('div');
-            response.className = "pl-7 text-slate-400 mt-1 leading-relaxed";
-
-            if (bin[cmd]) {
-                response.innerHTML = bin[cmd](arg);
+            response.className = "pl-6 text-slate-400";
+            
+            if (urls[cmd]) {
+                response.innerText = `Redirecting to ${cmd}...`;
+                window.open(urls[cmd], '_blank');
+            } else if (bin[cmd]) {
+                response.innerHTML = bin[cmd]();
             } else {
-                response.innerHTML = `<span class="text-red-500 font-medium">minishell: command not found: ${cmd}</span>`;
+                response.innerHTML = `<span class="text-red-500">bash: command not found: ${cmd}</span>`;
             }
-
-            history.appendChild(response);
-            output.scrollTo({ top: output.scrollHeight, behavior: 'smooth' });
+            
+            historyContainer.appendChild(response);
+            output.scrollTo(0, output.scrollHeight);
         }
 
-        // Auto-focus logic
         document.addEventListener('click', () => input.focus());
     </script>
 </body>
