@@ -3,144 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SegMind25 | Terminal Web</title>
+    <title>SegMind25 | Root Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
-        body { font-family: 'Fira Code', monospace; background-color: #020617; color: #e2e8f0; }
-        .terminal-shadow { box-shadow: 0 25px 50px -12px rgba(6, 182, 212, 0.2); }
-        .cursor { display: inline-block; width: 8px; height: 18px; background: #06b6d4; animation: blink 1s infinite; vertical-align: middle; }
+        body { font-family: 'Fira Code', monospace; background-color: #020617; color: #94a3b8; }
+        .cursor { display: inline-block; width: 10px; height: 20px; background: #22d3ee; animation: blink 1s infinite; vertical-align: middle; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        #google_translate_element { margin-right: 10px; }
-        input:focus { outline: none; }
+        #terminal::-webkit-scrollbar { width: 6px; }
+        #terminal::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        input:focus { outline: none; border: none; box-shadow: none; }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4 overflow-hidden">
+<body class="flex items-center justify-center min-h-screen p-2 md:p-6 overflow-hidden">
 
-    <div class="w-full max-w-5xl terminal-shadow rounded-xl overflow-hidden border border-slate-800 flex flex-col h-[85vh] bg-[#0f172a]">
+    <div class="w-full max-w-5xl h-[90vh] bg-[#0f172a] rounded-xl border border-slate-800 shadow-2xl flex flex-col overflow-hidden">
         
-        <div class="bg-slate-900 px-4 py-2 flex items-center gap-4 border-b border-slate-800">
-            <div class="flex gap-1.5">
-                <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
-                <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
-                <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+        <div class="bg-slate-900 px-4 py-2.5 flex items-center gap-4 border-b border-slate-800/50">
+            <div class="flex gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-500/20 border border-amber-500/50"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500/20 border border-emerald-500/50"></div>
             </div>
-            
-            <div class="flex items-center gap-3 text-slate-500 text-sm">
-                <i class="fa-solid fa-arrow-left cursor-pointer hover:text-white"></i>
-                <i class="fa-solid fa-arrow-right cursor-pointer hover:text-white"></i>
-                <i class="fa-solid fa-rotate-right cursor-pointer hover:text-white" onclick="location.reload()"></i>
+            <div class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-4 py-1 flex items-center gap-3">
+                <i class="fa-solid fa-terminal text-cyan-500 text-xs"></i>
+                <span id="url-path" class="text-xs text-slate-500 tracking-wider">segmind25@linux: ~</span>
             </div>
-
-            <div class="flex-1 bg-slate-950 border border-slate-800 rounded-md py-1 px-3 flex items-center gap-2">
-                <i class="fa-solid fa-lock text-[10px] text-emerald-500"></i>
-                <span class="text-xs text-slate-400 truncate">https://segmind25.linux/terminal</span>
-            </div>
-
-            <div class="flex items-center gap-4">
-                <div id="google_translate_element"></div>
-                <i class="fa-solid fa-bars text-slate-500 cursor-pointer hover:text-white"></i>
+            <div class="flex gap-4 text-slate-600">
+                <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
             </div>
         </div>
 
-        <div id="terminal-scroll" class="flex-1 overflow-y-auto p-6 space-y-2 text-sm md:text-base selection:bg-cyan-500/30">
-            <div id="output-stream">
-                <div class="text-cyan-400 mb-6">
-                    <pre class="text-[8px] md:text-[10px] leading-tight">
-███████╗███████╗ ██████╗ ███╗   ███╗██╗███╗   ██╗██████╗ 
-██╔════╝██╔════╝██╔════╝ ████╗ ████║██║████╗  ██║██╔══██╗
-███████╗█████╗  ██║  ███╗██╔████╔██║██║██╔██╗ ██║██║  ██║
-╚════██║██╔══╝  ██║   ██║██║╚██╔╝██║██║██║╚██╗██║██║  ██║
-███████║███████╗╚██████╔╝██║ ╚═╝ ██║██║██║ ╚████║██████╔╝
-╚══════╝╚══════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚══════╝</pre>
-                    <p class="mt-2 text-white font-bold text-lg">SegMind25 OS Shell v.1.0.4-LTS</p>
-                    <p class="text-slate-500 italic text-xs">Press Ctrl+L to clear screen or type 'help'.</p>
+        <div id="terminal" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-1 text-sm md:text-base selection:bg-cyan-500/20 selection:text-cyan-200">
+            <div id="history">
+                <div class="mb-6">
+                    <pre class="text-cyan-500 text-[6px] md:text-[9px] leading-none mb-4 font-bold">
+███████╗███████╗ ██████╗ ███╗   ███╗██╗███╗   ██╗██████╗ ██████╗ ███████╗
+██╔════╝██╔════╝██╔════╝ ████╗ ████║██║████╗  ██║██╔══██╗╚════██╗██╔════╝
+███████╗█████╗  ██║  ███╗██╔████╔██║██║██╔██╗ ██║██║  ██║ █████╔╝███████╗
+╚════██║██╔══╝  ██║   ██║██║╚██╔╝██║██║██║╚██╗██║██║  ██║██╔═══╝ ╚════██║
+███████║███████╗╚██████╔╝██║ ╚═╝ ██║██║██║ ╚████║██████╔╝███████╗███████║
+╚══════╝╚══════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚══════╝</pre>
+                    <p class="text-slate-100 font-bold">Welcome to SegMind25-OS v4.0.0 (LTS)</p>
+                    <p class="text-slate-500 text-xs mt-1 underline">Type 'help' to initialize session links.</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2">
-                <span class="text-emerald-400 font-bold">visitor@segmind25</span>
+            <div class="flex items-center flex-wrap gap-x-2">
+                <span class="text-emerald-400 font-bold">segmind25@linux</span>
                 <span class="text-slate-400">:</span>
-                <span class="text-cyan-400">~</span>
-                <span class="text-white">$</span>
-                <input type="text" id="cmdInput" class="flex-1 bg-transparent border-none text-slate-100 p-0 m-0" autofocus autocomplete="off" spellcheck="false">
+                <span id="current-dir" class="text-cyan-400 font-bold">~</span>
+                <span class="text-white font-bold">$</span>
+                <input type="text" id="bash-input" class="flex-1 min-w-[50px] bg-transparent border-none text-white font-medium focus:ring-0" autofocus autocomplete="off" spellcheck="false">
                 <span class="cursor"></span>
             </div>
         </div>
     </div>
 
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
-        }
-    </script>
-    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
     <script>
-        const input = document.getElementById('cmdInput');
-        const outputStream = document.getElementById('output-stream');
-        const scrollArea = document.getElementById('terminal-scroll');
+        const input = document.getElementById('bash-input');
+        const history = document.getElementById('history');
+        const terminal = document.getElementById('terminal');
+        const dirLabel = document.getElementById('current-dir');
+        const urlPath = document.getElementById('url-path');
 
-        const system = {
-            help: () => `Available commands: <br>
-                <span class='text-cyan-400'>ls</span> - List directories/socials<br>
-                <span class='text-cyan-400'>whoami</span> - User info<br>
-                <span class='text-cyan-400'>date</span> - System time<br>
-                <span class='text-cyan-400'>gaming</span> - YouTube Gaming Link<br>
-                <span class='text-cyan-400'>coding</span> - Linux & Code Link<br>
-                <span class='text-cyan-400'>clear</span> - Clear screen (or Ctrl+L)`,
-            ls: () => `<div class='grid grid-cols-3 gap-2 text-emerald-400'>
-                <span>drwxr-xr-x gaming</span>
-                <span>drwxr-xr-x coding</span>
-                <span>drwxr-xr-x projects</span>
-                <span>-rw-r--r-- tiktok</span>
-                <span>-rw-r--r-- discord</span>
-                </div>`,
-            whoami: () => `User: Guest_Visitor<br>Privileges: Read-Only<br>OS: SegMind25-Linux-Web-Kernel`,
-            date: () => new Date().toString(),
-            gaming: () => { window.open('https://www.youtube.com/@SegMind25', '_blank'); return "Opening YouTube Gaming channel..."; },
+        const fileSystem = {
+            '~': ['gaming', 'coding', 'projects', 'tiktok', 'discord', 'README.md'],
+            'projects': ['web-portfolio', 'bash-scripting', 'linux-tools']
+        };
+
+        const commands = {
+            help: () => `Available commands:<br>
+                <span class="text-cyan-400">ls</span> - List content<br>
+                <span class="text-cyan-400">cd [dir]</span> - Change directory<br>
+                <span class="text-cyan-400">cat [file]</span> - Read file<br>
+                <span class="text-cyan-400">clear</span> - Clear terminal (Ctrl+L)<br>
+                <span class="text-cyan-400">whoami</span> - Display user info<br>
+                <span class="text-cyan-400">socials</span> - Open all social links`,
+            ls: (dir) => `<div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-emerald-400 font-bold">
+                ${fileSystem[dir].map(item => `<span>${item.includes('.') ? '📄 ' : '📁 '}${item}</span>`).join('')}
+            </div>`,
+            whoami: () => "User: SegMind25 | Content Creator & Linux Architect",
+            date: () => new Date().toLocaleString(),
+            pwd: () => `/home/segmind25${dirLabel.innerText === '~' ? '' : '/' + dirLabel.innerText}`,
+            'readme.md': () => "Welcome! Navigate to any folder or type the name of the social platform to open it directly.",
+            gaming: () => { window.open('https://www.youtube.com/@SegMind25', '_blank'); return "Opening YouTube Gaming..."; },
             coding: () => { window.open('https://www.youtube.com/@SegError', '_blank'); return "Opening Linux & Coding channel..."; },
-            tiktok: () => { window.open('https://www.tiktok.com/@segmind25', '_blank'); return "Opening TikTok..."; },
-            discord: () => { window.open('https://discord.gg/WeUYH3x9Cr', '_blank'); return "Connecting to Discord..."; },
-            projects: () => { window.open('https://github.com/SegMind25', '_blank'); return "Fetching GitHub repositories..."; }
+            tiktok: () => { window.open('https://www.tiktok.com/@segmind25', '_blank'); return "Redirecting to TikTok..."; },
+            discord: () => { window.open('https://discord.gg/WeUYH3x9Cr', '_blank'); return "Joining Discord..."; },
+            projects: () => { window.open('https://github.com/SegMind25', '_blank'); return "Opening GitHub..."; }
         };
 
         input.addEventListener('keydown', (e) => {
-            // Support Ctrl+L for clear
+            // CTRL + L (Clear)
             if (e.ctrlKey && e.key === 'l') {
                 e.preventDefault();
-                clearScreen();
+                history.innerHTML = `<p class="text-slate-600 text-xs italic mb-4">-- terminal history cleared --</p>`;
             }
 
             if (e.key === 'Enter') {
-                const cmd = input.value.toLowerCase().trim();
-                execute(cmd);
+                const fullCmd = input.value.trim().toLowerCase();
+                const parts = fullCmd.split(' ');
+                const cmd = parts[0];
+                const arg = parts[1];
+
+                handleBash(fullCmd, cmd, arg);
                 input.value = '';
             }
         });
 
-        function clearScreen() {
-            outputStream.innerHTML = `<p class='text-slate-500 text-xs italic mb-4'>Console cleared. System ready.</p>`;
-        }
-
-        function execute(cmd) {
-            const prompt = `<div class="flex gap-2 text-xs text-slate-500 mt-4">
-                <span class="text-emerald-500">➜</span> <span>visitor@segmind25:~$ ${cmd}</span>
-            </div>`;
+        function handleBash(fullCmd, cmd, arg) {
+            const line = document.createElement('div');
+            line.className = "mt-4";
+            line.innerHTML = `
+                <div class="flex gap-2">
+                    <span class="text-emerald-400 font-bold">➜</span>
+                    <span class="text-cyan-400 font-bold">${dirLabel.innerText}</span>
+                    <span class="text-slate-100">${fullCmd}</span>
+                </div>`;
             
-            let response = "";
+            const response = document.createElement('div');
+            response.className = "pl-6 text-slate-400 mt-1";
+
             if (cmd === 'clear') {
-                clearScreen();
+                history.innerHTML = '';
                 return;
-            } else if (system[cmd]) {
-                response = `<div class="pl-4 text-slate-300 mt-1">${system[cmd]()}</div>`;
+            } else if (cmd === 'ls') {
+                response.innerHTML = commands.ls(dirLabel.innerText === '~' ? '~' : arg || dirLabel.innerText);
+            } else if (cmd === 'cd') {
+                if (!arg || arg === '~' || arg === '..') {
+                    dirLabel.innerText = '~';
+                    urlPath.innerText = 'segmind25@linux: ~';
+                } else if (fileSystem['~'].includes(arg)) {
+                    dirLabel.innerText = arg;
+                    urlPath.innerText = `segmind25@linux: ~/${arg}`;
+                } else {
+                    response.innerHTML = `<span class="text-red-500">cd: ${arg}: No such directory</span>`;
+                }
+            } else if (cmd === 'cat') {
+                if (arg === 'readme.md') response.innerHTML = commands['readme.md']();
+                else response.innerHTML = `<span class="text-red-500">cat: ${arg || 'file'}: No such file</span>`;
+            } else if (commands[cmd]) {
+                response.innerHTML = commands[cmd]();
             } else if (cmd !== "") {
-                response = `<div class="pl-4 text-red-500 mt-1 italic">bash: command not found: ${cmd}</div>`;
+                response.innerHTML = `<span class="text-red-500">bash: command not found: ${cmd}</span>`;
             }
 
-            outputStream.innerHTML += prompt + response;
-            scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: 'smooth' });
+            history.appendChild(line);
+            history.appendChild(response);
+            terminal.scrollTo({ top: terminal.scrollHeight, behavior: 'smooth' });
         }
 
         document.addEventListener('click', () => input.focus());
