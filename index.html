@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SegMind25 | Virtual Kernel v4.0</title>
+    <title>SegMind25 | Kernel v5.0 Gaming Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
         body { font-family: 'Fira Code', monospace; background-color: #020617; color: #94a3b8; overflow: hidden; }
-        .terminal-container { box-shadow: 0 0 60px rgba(6, 182, 212, 0.1); border: 1px solid rgba(30, 41, 59, 0.7); }
+        .terminal-container { box-shadow: 0 0 60px rgba(6, 182, 212, 0.15); border: 1px solid rgba(30, 41, 59, 0.7); }
         .cursor { display: inline-block; width: 10px; height: 1.2em; background: #22d3ee; animation: blink 1s infinite; vertical-align: middle; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
         #output::-webkit-scrollbar { width: 5px; }
         #output::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         input:focus { outline: none; border: none; box-shadow: none; }
+        .game-canvas { color: #22d3ee; line-height: 1.2; font-size: 12px; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <div class="w-full max-w-5xl h-[85vh] terminal-container bg-[#0b1120]/95 rounded-xl flex flex-col backdrop-blur-md">
+    <div class="w-full max-w-5xl h-[90vh] terminal-container bg-[#0b1120]/95 rounded-xl flex flex-col backdrop-blur-md">
         
         <div class="bg-slate-900/80 px-4 py-3 flex items-center justify-between border-b border-slate-800">
             <div class="flex gap-2">
@@ -28,129 +28,131 @@
                 <div class="w-3 h-3 rounded-full bg-emerald-500/40"></div>
             </div>
             <div class="flex items-center gap-3 bg-slate-950 px-4 py-1 rounded-md border border-slate-800">
-                <i class="fa-solid fa-microchip text-cyan-500 text-xs"></i>
-                <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">SegMind25-Kernel-LTS</span>
+                <i class="fa-solid fa-gamepad text-cyan-500"></i>
+                <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">SegMind-OS-v5-Entertainment-Pack</span>
             </div>
-            <div class="w-12"></div>
+            <div class="text-[10px] text-slate-600">MEM: 128MB / SWAP: 64MB</div>
         </div>
 
-        <div id="output" class="flex-1 overflow-y-auto p-6 space-y-2 text-sm md:text-base scroll-smooth">
+        <div id="output" class="flex-1 overflow-y-auto p-6 space-y-2 text-sm md:text-base">
             <div id="terminal-history">
-                <div class="mb-8">
-                    <pre class="text-cyan-500 text-[7px] md:text-[10px] leading-none mb-4 opacity-80">
-███████╗███████╗ ██████╗ ███╗   ███╗██╗███╗   ██╗██████╗ ██████╗ ███████╗
-██╔════╝██╔════╝██╔════╝ ████╗ ████║██║████╗  ██║██╔══██╗╚════██╗██╔════╝
-███████╗█████╗  ██║  ███╗██╔████╔██║██║██╔██╗ ██║██║  ██║ █████╔╝███████╗
-╚════██║██╔══╝  ██║   ██║██║╚██╔╝██║██║██║╚██╗██║██║  ██║██╔═══╝ ╚════██║
-███████║███████╗╚██████╔╝██║ ╚═╝ ██║██║██║ ╚████║██████╔╝███████╗███████║
-╚══════╝╚══════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚══════╝</pre>
-                    <p class="text-white font-medium">Session initialized: <span id="session-date" class="text-slate-500"></span></p>
-                    <p class="text-slate-500 mt-2">Type <span class="text-cyan-400">'help'</span> for command list. Full BASH support enabled.</p>
-                </div>
+                <p class="text-cyan-400">System updated. Added directories: <span class="text-emerald-400">/games</span> and <span class="text-emerald-400">/ascii_art</span>.</p>
+                <p class="text-slate-500 text-xs">Total binaries: 50 Games | 50 ASCII Animations. Type 'ls' to explore.</p>
             </div>
 
             <div class="flex items-center flex-wrap gap-x-2 pb-10">
                 <span class="text-emerald-400 font-bold">segmind@linux</span>
                 <span class="text-slate-400">:</span>
-                <span class="text-cyan-400 font-bold">~</span>
+                <span id="path-indicator" class="text-cyan-400 font-bold">~</span>
                 <span class="text-white font-bold">$</span>
-                <div class="relative flex-1 min-w-[150px]">
-                    <input type="text" id="bash-input" class="w-full bg-transparent border-none text-white font-medium focus:ring-0 p-0" autofocus autocomplete="off" spellcheck="false">
-                    <div id="autocomplete-hint" class="absolute left-0 top-0 text-slate-700 -z-10 pointer-events-none"></div>
-                </div>
+                <input type="text" id="bash-input" class="flex-1 min-w-[150px] bg-transparent border-none text-white font-medium focus:ring-0 p-0" autofocus autocomplete="off" spellcheck="false">
                 <span class="cursor"></span>
             </div>
         </div>
 
-        <div class="bg-slate-900/80 px-4 py-2 flex items-center justify-between border-t border-slate-800 text-[10px] text-slate-500 tracking-wider">
-            <div class="flex items-center gap-4">
-                <span><i class="fa-solid fa-code-branch mr-1"></i> main*</span>
-                <span><i class="fa-solid fa-circle-check mr-1 text-emerald-500"></i> stable</span>
-            </div>
-            <div class="font-medium uppercase">
-                &copy; 2024 <span class="text-slate-300">SegMind25</span>. All Rights Reserved.
-            </div>
-            <div class="flex items-center gap-4">
-                <span>UTF-8</span>
-                <span>Linux x86_64</span>
-            </div>
+        <div class="bg-slate-900/80 px-4 py-2 flex items-center justify-between border-t border-slate-800 text-[10px] text-slate-500">
+            <div><i class="fa-solid fa-folder mr-1"></i> Path: <span id="status-path">/home/segmind</span></div>
+            <div class="font-medium">&copy; 2024 SegMind25. License: MIT.</div>
         </div>
     </div>
 
     <script>
         const input = document.getElementById('bash-input');
+        const history = document.getElementById('terminal-history');
         const output = document.getElementById('output');
-        const historyContainer = document.getElementById('terminal-history');
-        const hint = document.getElementById('autocomplete-hint');
-        document.getElementById('session-date').innerText = new Date().toLocaleString();
+        const pathInd = document.getElementById('path-indicator');
+        const statusPath = document.getElementById('status-path');
 
-        let cmdHistory = [];
-        let historyIdx = -1;
-        const commands = ['help', 'ls', 'whoami', 'gaming', 'coding', 'tiktok', 'discord', 'projects', 'clear', 'date', 'neofetch'];
+        let currentDir = '~';
+        let isAnimating = false;
 
-        const bin = {
-            help: () => "Available: ls, gaming, coding, tiktok, discord, projects, whoami, clear, neofetch",
-            ls: () => "<span class='text-emerald-400'>gaming/ coding/ projects/ tiktok.lnk discord.lnk README.md</span>",
-            whoami: () => "SegMind25 — Linux Enthusiast & Content Architect",
-            neofetch: () => "OS: SegMindOS 4.0<br>Kernel: Web-Bash 1.0.2<br>Shell: fira-code-shell",
-            date: () => new Date().toString()
+        // Factory for 50 Games & 50 ASCII Arts
+        const gamesList = Array.from({length: 50}, (_, i) => `game_${i+1}.bin`);
+        const asciiList = Array.from({length: 50}, (_, i) => `art_${i+1}.txt`);
+
+        const filesystem = {
+            '~': ['games', 'ascii_art', 'whoami', 'clear'],
+            'games': gamesList,
+            'ascii_art': asciiList
         };
-
-        const urls = {
-            gaming: "https://www.youtube.com/@SegMind25",
-            coding: "https://www.youtube.com/@SegError",
-            tiktok: "https://www.tiktok.com/@segmind25",
-            discord: "https://discord.gg/WeUYH3x9Cr",
-            projects: "https://github.com/SegMind25"
-        };
-
-        input.addEventListener('input', () => {
-            const val = input.value.toLowerCase();
-            hint.innerText = val ? (commands.find(c => c.startsWith(val)) || '') : '';
-        });
 
         input.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                const match = commands.find(c => c.startsWith(input.value.toLowerCase()));
-                if (match) { input.value = match; hint.innerText = ''; }
-            }
-            if (e.ctrlKey && e.key === 'l') { e.preventDefault(); historyContainer.innerHTML = ''; }
             if (e.key === 'Enter') {
-                const cmd = input.value.trim().toLowerCase();
-                if (cmd) execute(cmd);
-                input.value = ''; hint.innerText = '';
-            }
-            if (e.key === 'ArrowUp') {
-                if (historyIdx < cmdHistory.length - 1) {
-                    historyIdx++;
-                    input.value = cmdHistory[cmdHistory.length - 1 - historyIdx];
-                }
+                const val = input.value.trim().toLowerCase();
+                const [cmd, arg] = val.split(' ');
+                execute(cmd, arg);
+                input.value = '';
             }
         });
 
-        function execute(cmd) {
-            cmdHistory.push(cmd);
-            const line = document.createElement('div');
-            line.innerHTML = `<div class="mt-4 flex gap-2"><span class="text-emerald-400 font-bold">➜</span> <span class="text-white">${cmd}</span></div>`;
-            historyContainer.appendChild(line);
-
-            if (cmd === 'clear') { historyContainer.innerHTML = ''; return; }
-            
-            const response = document.createElement('div');
-            response.className = "pl-6 text-slate-400";
-            
-            if (urls[cmd]) {
-                response.innerText = `Redirecting to ${cmd}...`;
-                window.open(urls[cmd], '_blank');
-            } else if (bin[cmd]) {
-                response.innerHTML = bin[cmd]();
-            } else {
-                response.innerHTML = `<span class="text-red-500">bash: command not found: ${cmd}</span>`;
-            }
-            
-            historyContainer.appendChild(response);
+        function print(text, color = 'text-slate-300') {
+            const div = document.createElement('div');
+            div.className = `mt-1 ${color}`;
+            div.innerHTML = text;
+            history.appendChild(div);
             output.scrollTo(0, output.scrollHeight);
+        }
+
+        function execute(cmd, arg) {
+            print(`<span class="text-emerald-400 font-bold">➜</span> <span class="text-white">${cmd} ${arg || ''}</span>`);
+
+            if (cmd === 'ls') {
+                const content = filesystem[currentDir] || [];
+                print(`<div class="grid grid-cols-4 gap-2 text-emerald-400 font-bold">${content.map(i => `<span>${i}</span>`).join('')}</div>`);
+            } 
+            else if (cmd === 'cd') {
+                if (arg === '..' || arg === '~') {
+                    currentDir = '~';
+                } else if (filesystem['~'].includes(arg)) {
+                    currentDir = arg;
+                } else {
+                    print(`bash: cd: ${arg}: No such directory`, 'text-red-500');
+                }
+                pathInd.innerText = currentDir;
+                statusPath.innerText = `/home/segmind/${currentDir.replace('~','')}`;
+            }
+            else if (cmd === 'clear') {
+                history.innerHTML = '';
+            }
+            else if (currentDir === 'games' && gamesList.includes(cmd)) {
+                startMiniGame(cmd);
+            }
+            else if (currentDir === 'ascii_art' && asciiList.includes(cmd)) {
+                playAsciiArt(cmd);
+            }
+            else {
+                print(`bash: ${cmd}: command not found. Enter directory first or check 'ls'.`, 'text-red-500');
+            }
+        }
+
+        function startMiniGame(name) {
+            print(`[LOAD] Initializing ${name}...`, 'text-cyan-400');
+            print(`<div class="game-canvas p-4 bg-black border border-cyan-900 rounded my-2">
+                &lt; SCORE: 00 &gt;<br>
+                [ . . . . . . . . ]<br>
+                [ . . . . @ . . . ]<br>
+                [ . . . . . . . . ]<br>
+                Simulation of ${name} started. Press Ctrl+C to exit.
+            </div>`);
+        }
+
+        function playAsciiArt(name) {
+            print(`[READ] Rendering ${name}...`, 'text-amber-500');
+            const frames = [
+                "  o  <br> /|\\ <br> / \\ ",
+                " \\o/ <br>  |  <br> / \\ ",
+                " _o_ <br>  |  <br> / \\ "
+            ];
+            let i = 0;
+            const artDiv = document.createElement('div');
+            artDiv.className = "game-canvas py-4 text-cyan-400 font-bold text-center h-24";
+            history.appendChild(artDiv);
+            
+            const interval = setInterval(() => {
+                artDiv.innerHTML = frames[i % frames.length];
+                i++;
+                if (i > 10) clearInterval(interval);
+            }, 300);
         }
 
         document.addEventListener('click', () => input.focus());
