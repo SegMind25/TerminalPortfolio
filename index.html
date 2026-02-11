@@ -837,14 +837,16 @@ Type <span class="c-yellow">contact</span> for links or <span class="c-yellow">s
         setInterval(tick, 1000);
 
         // ─── Welcome ───
-        const banner = `<span class="c-green">
- ▄▄▄▄▄ ▄▄▄▄▄ ▄▄▄▄  ▄   ▄ ▄▄▄ ▄   ▄ ▄▄▄   ▄▄▄  ▄▄▄▄▄
- █     █     █    ▀ ██ ██  █  █▀▄ █ █   ▀ ▀▄▄▀  █    
-  ▀▀▀▄ █▀▀▀  █  ▀▄ █▀█▀█  █  █ ▀▄█ █  ▄▀  ▄▄▀  ▀▀▀▄
- ▄▄▄▄▀ █▄▄▄▄ ▀▄▄▄▀ █   █ ▄█▄ █   █ ▀▄▄▄▀ █▄▄▄▄ ▄▄▄▄▀</span>`;
-        print(banner);
-        print(`<span class="c-dim">Last login: ${new Date().toLocaleString()}</span>`);
-        print(`<span class="c-dim">Type</span> <span class="c-yellow">help</span> <span class="c-dim">to get started.</span>`);
+        print(`<span class="c-green" style="white-space:pre;line-height:1.15">
+ ███████╗███████╗ ██████╗ ███╗   ███╗██╗███╗   ██╗██████╗ ██████╗ ███████╗
+ ██╔════╝██╔════╝██╔════╝ ████╗ ████║██║████╗  ██║██╔══██╗╚════██╗██╔════╝
+ ███████╗█████╗  ██║  ███╗██╔████╔██║██║██╔██╗ ██║██║  ██║ █████╔╝███████╗
+ ╚════██║██╔══╝  ██║   ██║██║╚██╔╝██║██║██║╚██╗██║██║  ██║██╔═══╝ ╚════██║
+ ███████║███████╗╚██████╔╝██║ ╚═╝ ██║██║██║ ╚████║██████╔╝███████╗███████║
+ ╚══════╝╚══════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚══════╝</span>`);
+        print(`<span class="c-dim">  ─────────────────────────────────────────────────────────────────</span>`);
+        print(`<span class="c-dim">  [</span><span class="c-green b">v3.0</span><span class="c-dim">]  Terminal Portfolio</span>  <span class="c-dim">│</span>  <span class="c-dim">Last login:</span> ${new Date().toLocaleString()}`);
+        print(`<span class="c-dim">  Type</span> <span class="c-yellow">help</span> <span class="c-dim">to get started.</span>`);
         print('');
 
         $in.focus();
