@@ -628,6 +628,13 @@ Visit my GitHub for the complete list!`
   skills                  View skills
   contact                 Contact information
   socials                 Social media links
+
+<strong>Quick Links (Opens in new tab):</strong>
+  gaming                  YouTube Gaming Channel
+  coding                  YouTube Coding Channel
+  tiktok                  TikTok Profile
+  discord                 Discord Server
+  github / projects       GitHub Projects
   
 <strong>Shortcuts:</strong>
   Tab                     Autocomplete
@@ -892,6 +899,41 @@ Feel free to reach out on any platform!
 <span class="info">          \`"Y$b._</span>
 <span class="info">              \`"""</span>
 </div>`;
+            },
+
+            // Quick Link Commands - Opens URLs directly
+            gaming: () => {
+                window.open('https://www.youtube.com/@SegMind25', '_blank');
+                return `<div class="cmd-output success">🎮 Opening YouTube Gaming Channel (@SegMind25)...</div>`;
+            },
+
+            coding: () => {
+                window.open('https://www.youtube.com/@SegError', '_blank');
+                return `<div class="cmd-output success">💻 Opening YouTube Coding Channel (@SegError)...</div>`;
+            },
+
+            tiktok: () => {
+                window.open('https://www.tiktok.com/@segmind25', '_blank');
+                return `<div class="cmd-output success">📱 Opening TikTok Profile (@segmind25)...</div>`;
+            },
+
+            discord: () => {
+                window.open('https://discord.gg/WeUYH3x9Cr', '_blank');
+                return `<div class="cmd-output success">💬 Opening Discord Server...</div>`;
+            },
+
+            github: () => {
+                window.open('https://github.com/SegMind25', '_blank');
+                return `<div class="cmd-output success">🐙 Opening GitHub Profile (SegMind25)...</div>`;
+            },
+
+            projects: () => {
+                window.open('https://github.com/SegMind25', '_blank');
+                return `<div class="cmd-output success">🚀 Opening GitHub Projects (SegMind25)...</div>`;
+            },
+
+            youtube: () => {
+                return `<div class="cmd-output info">📺 Which channel? Try: <span class="warning">gaming</span> or <span class="warning">coding</span></div>`;
             }
         };
 
