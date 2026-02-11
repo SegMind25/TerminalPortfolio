@@ -263,6 +263,31 @@
             border-color: var(--c-green);
         }
 
+        /* ── Tab Completion Menu ── */
+        .tab-menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 12px;
+            margin: 4px 0;
+        }
+
+        .tab-item {
+            padding: 1px 6px;
+            border-radius: 3px;
+            color: var(--c-text);
+            transition: background .1s, color .1s;
+        }
+
+        .tab-item.active {
+            background: var(--c-blue);
+            color: #000;
+            font-weight: 700;
+        }
+
+        .c-link {
+            color: var(--c-green);
+        }
+
         /* ── Welcome ── */
         .welcome {
             margin-bottom: 16px;
@@ -375,6 +400,11 @@ Coding   youtube.com/@SegError
 TikTok   tiktok.com/@segmind25
 Discord  discord.gg/WeUYH3x9Cr
 GitHub   github.com/SegMind25` },
+                    'gaming.link': { type: 'link', url: 'https://www.youtube.com/@SegMind25', content: '🎮 YouTube Gaming — youtube.com/@SegMind25' },
+                    'coding.link': { type: 'link', url: 'https://www.youtube.com/@SegError', content: '💻 YouTube Coding — youtube.com/@SegError' },
+                    'tiktok.link': { type: 'link', url: 'https://www.tiktok.com/@segmind25', content: '📱 TikTok — tiktok.com/@segmind25' },
+                    'discord.link': { type: 'link', url: 'https://discord.gg/WeUYH3x9Cr', content: '💬 Discord — discord.gg/WeUYH3x9Cr' },
+                    'github.link': { type: 'link', url: 'https://github.com/SegMind25', content: '🐙 GitHub — github.com/SegMind25' },
                     'projects': {
                         type: 'd',
                         children: {
@@ -395,6 +425,12 @@ GitHub   github.com/SegMind25` },
         let cwd = '/home/segmind';
         let history = [];
         let histIdx = -1;
+
+        // Tab completion cycling state
+        let tabMatches = [];
+        let tabIdx = -1;
+        let tabBase = '';    // The original typed text before cycling
+        let tabMenuEl = null;
 
         // ─── DOM ───
         const $out = document.getElementById('out');
@@ -506,18 +542,21 @@ GitHub   github.com/SegMind25` },
                 const showLong = flags.includes('l');
                 let items = showAll ? ['.', '..', ...names] : names;
                 if (!items.length) return '';
+                const cls = (n, ch) => ch.type === 'd' ? 'dir' : ch.type === 'link' ? 'c-green' : 'c-text';
                 if (showLong) {
                     return '<span class="out">' + items.map(n => {
                         const ch = (n === '.' || n === '..') ? node : node.children[n];
                         const isD = ch.type === 'd';
-                        const perm = isD ? 'drwxr-xr-x' : '-rw-r--r--';
+                        const isL = ch.type === 'link';
+                        const perm = isD ? 'drwxr-xr-x' : isL ? 'lrwxrwxrwx' : '-rw-r--r--';
                         const sz = isD ? '4096' : String(ch.content?.length || 0).padStart(5);
-                        return `${perm}  segmind  ${sz}  <span class="${isD ? 'dir' : 'c-text'}">${n}${isD ? '/' : ''}</span>`;
+                        const suffix = isD ? '/' : isL ? ' -> ' + ch.url : '';
+                        return `${perm}  segmind  ${sz}  <span class="${cls(n, ch)}">${n}${suffix}</span>`;
                     }).join('\n') + '</span>';
                 }
                 return '<span class="out">' + items.map(n => {
                     const ch = (n === '.' || n === '..') ? node : node.children[n];
-                    return `<span class="${ch.type === 'd' ? 'dir' : 'c-text'}">${n}${ch.type === 'd' ? '/' : ''}</span>`;
+                    return `<span class="${cls(n, ch)}">${n}${ch.type === 'd' ? '/' : ''}</span>`;
                 }).join('  ') + '</span>';
             },
 
@@ -539,6 +578,10 @@ GitHub   github.com/SegMind25` },
                 const node = getNode(path);
                 if (!node) return `<span class="c-red">cat: ${esc(args[0])}: No such file or directory</span>`;
                 if (node.type === 'd') return `<span class="c-red">cat: ${esc(args[0])}: Is a directory</span>`;
+                if (node.type === 'link') {
+                    window.open(node.url, '_blank');
+                    return `<span class="c-green">Opening ${node.url} …</span>`;
+                }
                 return `<span class="out">${esc(node.content || '')}</span>`;
             },
 
@@ -676,27 +719,74 @@ Type <span class="c-yellow">contact</span> for links or <span class="c-yellow">s
             return Object.keys(node.children).filter(n => n.toLowerCase().startsWith(partial));
         };
 
+        const clearTabMenu = () => {
+            if (tabMenuEl) { tabMenuEl.remove(); tabMenuEl = null; }
+            tabMatches = []; tabIdx = -1; tabBase = '';
+        };
+
+        const renderTabMenu = () => {
+            if (tabMenuEl) tabMenuEl.remove();
+            const div = document.createElement('div');
+            div.className = 'tab-menu line';
+            tabMatches.forEach((m, i) => {
+                const span = document.createElement('span');
+                span.className = 'tab-item' + (i === tabIdx ? ' active' : '');
+                span.textContent = m;
+                div.appendChild(span);
+            });
+            $out.appendChild(div);
+            tabMenuEl = div;
+            scroll();
+        };
+
+        const applyTabSelection = () => {
+            if (tabIdx < 0 || tabIdx >= tabMatches.length) return;
+            const parts = tabBase.split(/\s+/);
+            parts[parts.length - 1] = tabMatches[tabIdx];
+            $in.value = parts.join(' ');
+        };
+
         // ─── Input Handling ───
+        // Reset tab state on any non-tab key
+        $in.addEventListener('input', () => { clearTabMenu(); });
+
         $in.addEventListener('keydown', e => {
             if (e.key === 'Tab') {
                 e.preventDefault();
                 const val = $in.value;
                 if (!val) return;
-                const matches = complete(val);
-                if (matches.length === 1) {
-                    const parts = val.split(/\s+/);
-                    parts[parts.length - 1] = matches[0];
-                    $in.value = parts.join(' ');
-                } else if (matches.length > 1) {
-                    // Show all matches
-                    printPrompt(val);
-                    print('<span class="out">' + matches.join('  ') + '</span>');
-                    scroll();
+
+                // First Tab press: compute matches
+                if (tabMatches.length === 0) {
+                    const matches = complete(val);
+                    if (matches.length === 0) return;
+                    if (matches.length === 1) {
+                        // Only one match — auto-complete immediately
+                        const parts = val.split(/\s+/);
+                        parts[parts.length - 1] = matches[0];
+                        $in.value = parts.join(' ');
+                        return;
+                    }
+                    // Multiple matches — start cycling
+                    tabMatches = matches;
+                    tabBase = val;
+                    tabIdx = e.shiftKey ? matches.length - 1 : 0;
+                } else {
+                    // Already cycling — move index
+                    if (e.shiftKey) {
+                        tabIdx = (tabIdx - 1 + tabMatches.length) % tabMatches.length;
+                    } else {
+                        tabIdx = (tabIdx + 1) % tabMatches.length;
+                    }
                 }
+
+                applyTabSelection();
+                renderTabMenu();
                 return;
             }
 
             if (e.key === 'Enter') {
+                clearTabMenu();
                 exec($in.value);
                 $in.value = '';
                 return;
