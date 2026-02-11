@@ -4,144 +4,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SegMind25@terminal ~ $</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <title>segmind@portfolio: ~</title>
+    <meta name="description" content="SegMind25 — Interactive Terminal Portfolio">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         :root {
-            --bg-page: #000000;
-            --bg-terminal: #0f0f0f;
-            --text-primary: #e0e0e0;
-            --text-secondary: #808080;
-            --accent-color: #33ff00;
-            /* Classic Terminal Green */
-            --border-color: #333333;
+            --c-bg: #0c0c0c;
+            --c-surface: #141414;
+            --c-border: #222;
+            --c-text: #ccc;
+            --c-dim: #555;
+            --c-green: #4ec9b0;
+            --c-blue: #569cd6;
+            --c-yellow: #dcdcaa;
+            --c-red: #f44747;
+            --c-purple: #c586c0;
+            --c-orange: #ce9178;
+            --c-cyan: #9cdcfe;
         }
 
-        * {
+        *,
+        *::before,
+        *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
-            background-color: var(--bg-page);
-            color: var(--text-primary);
-            height: 100vh;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--c-bg);
+            color: var(--c-text);
+            height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
         }
 
-        .terminal-wrapper {
-            width: 100%;
-            max-width: 1000px;
-            height: 80vh;
-            background-color: var(--bg-terminal);
-            border: 1px solid var(--border-color);
+        /* ── Terminal Frame ── */
+        .term {
+            width: 920px;
+            height: 620px;
+            max-width: 96vw;
+            max-height: 92dvh;
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, .6);
         }
 
-        .terminal-header {
-            padding: 10px 15px;
-            background-color: #1a1a1a;
-            border-bottom: 1px solid var(--border-color);
+        /* ── Title Bar ── */
+        .term-bar {
+            height: 38px;
+            background: #1a1a1a;
+            border-bottom: 1px solid var(--c-border);
             display: flex;
             align-items: center;
-            gap: 10px;
+            padding: 0 14px;
+            flex-shrink: 0;
+            position: relative;
         }
 
-        .traffic-lights {
+        .dots {
             display: flex;
-            gap: 8px;
+            gap: 7px;
         }
 
-        .traffic-light {
-            width: 12px;
-            height: 12px;
+        .dot {
+            width: 11px;
+            height: 11px;
             border-radius: 50%;
-            background-color: #333;
-        }
-
-        .traffic-light.close {
-            background-color: #ff5f56;
-        }
-
-        .traffic-light.min {
-            background-color: #ffbd2e;
-        }
-
-        .traffic-light.max {
-            background-color: #27c93f;
-        }
-
-        .terminal-title {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .terminal-body {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-
-        /* Scrollbar */
-        .terminal-body::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        .terminal-body::-webkit-scrollbar-track {
-            background: var(--bg-terminal);
-        }
-
-        .terminal-body::-webkit-scrollbar-thumb {
             background: #333;
-            border: 1px solid var(--bg-terminal);
+            transition: background .15s;
         }
 
-        .terminal-body::-webkit-scrollbar-thumb:hover {
-            background: #555;
+        .term:hover .dot.r {
+            background: #ff5f57;
         }
 
-        .prompt {
-            margin-top: 5px;
+        .term:hover .dot.y {
+            background: #febc2e;
+        }
+
+        .term:hover .dot.g {
+            background: #28c840;
+        }
+
+        .term-bar-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: var(--c-dim);
+        }
+
+        /* ── Body ── */
+        .term-body {
+            flex: 1;
+            padding: 20px 22px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.65;
+            scroll-behavior: smooth;
+        }
+
+        .term-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .term-body::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+            border-radius: 3px;
+        }
+
+        /* ── Footer ── */
+        .term-foot {
+            height: 28px;
+            background: #1a1a1a;
+            border-top: 1px solid var(--c-border);
             display: flex;
-            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            font-size: 10px;
+            color: var(--c-dim);
+            flex-shrink: 0;
+        }
+
+        /* ── Prompt ── */
+        .line {
+            margin-bottom: 4px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .ps1 {
+            display: inline;
+        }
+
+        .ps1 .u {
+            color: var(--c-green);
+            font-weight: 700;
+        }
+
+        .ps1 .h {
+            color: var(--c-blue);
+            font-weight: 700;
+        }
+
+        .ps1 .d {
+            color: var(--c-dim);
+        }
+
+        .ps1 .p {
+            color: var(--c-purple);
+        }
+
+        .ps1 .s {
+            color: var(--c-yellow);
+            font-weight: 700;
+        }
+
+        .input-row {
+            display: flex;
             align-items: center;
         }
 
-        .prompt-user {
-            color: var(--accent-color);
-            font-weight: bold;
+        #in {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--c-text);
+            font: inherit;
+            outline: none;
+            caret-color: var(--c-green);
+            margin-left: 6px;
         }
 
-        .prompt-symbol {
-            color: var(--text-primary);
-        }
-
-        .cursor {
+        .cursor-block {
             display: inline-block;
-            width: 10px;
-            height: 1.2em;
-            background-color: var(--text-primary);
+            width: 8px;
+            height: 15px;
+            background: var(--c-text);
             animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 1px;
         }
 
         @keyframes blink {
@@ -150,813 +200,561 @@
             }
         }
 
-        #terminalInput {
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: inherit;
-            width: 100%;
-            outline: none;
+        /* ── Output Helpers ── */
+        .out {
+            color: #aaa;
+            padding-left: 2px;
         }
 
-        .output-line {
-            margin-bottom: 5px;
-            word-wrap: break-word;
+        .c-green {
+            color: var(--c-green);
         }
 
-        .cmd-output {
-            padding-left: 0;
-            color: #ccc;
+        .c-blue {
+            color: var(--c-blue);
         }
 
-        .input-line {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
+        .c-yellow {
+            color: var(--c-yellow);
         }
 
-        .banner {
-            color: var(--accent-color);
-            font-weight: bold;
-            white-space: pre;
-            margin-bottom: 20px;
-            font-size: 0.8rem;
+        .c-red {
+            color: var(--c-red);
         }
 
-        .welcome-msg {
-            margin-bottom: 20px;
-            color: var(--text-primary);
+        .c-purple {
+            color: var(--c-purple);
         }
 
-        .footer {
-            padding: 5px 15px;
-            border-top: 1px solid var(--border-color);
-            font-size: 0.75rem;
-            color: #666;
-            display: flex;
-            justify-content: space-between;
+        .c-orange {
+            color: var(--c-orange);
         }
 
-        .autocomplete-hint {
-            color: #555;
-            position: absolute;
-            pointer-events: none;
+        .c-cyan {
+            color: var(--c-cyan);
         }
 
-        /* Utility Colors for content */
-        .info {
-            color: #5fb3b3;
+        .c-dim {
+            color: var(--c-dim);
         }
 
-        .success {
-            color: #98c379;
+        .c-text {
+            color: var(--c-text);
         }
 
-        .warning {
-            color: #e5c07b;
+        .b {
+            font-weight: 700;
         }
 
-        .error {
-            color: #e06c75;
+        .dir {
+            color: var(--c-blue);
+            font-weight: 700;
         }
 
-        .link {
-            color: #61afef;
-            text-decoration: underline;
+        .lnk {
+            color: var(--c-text);
             cursor: pointer;
+            border-bottom: 1px dotted var(--c-dim);
+            transition: color .15s;
         }
 
-        .directory {
-            color: #61afef;
-            font-weight: bold;
+        .lnk:hover {
+            color: var(--c-green);
+            border-color: var(--c-green);
         }
 
+        /* ── Welcome ── */
+        .welcome {
+            margin-bottom: 16px;
+        }
+
+        .welcome .title {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--c-text);
+        }
+
+        .welcome .sub {
+            color: var(--c-dim);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        /* ── Mobile ── */
         @media (max-width: 600px) {
-            .terminal-wrapper {
-                height: 100vh;
+            .term {
                 width: 100%;
+                height: 100dvh;
+                max-width: none;
+                max-height: none;
                 border: none;
+                border-radius: 0;
+            }
+
+            .term-bar,
+            .term-foot {
+                border-radius: 0;
+            }
+
+            .term-body {
+                font-size: 12px;
+                padding: 14px;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="terminal-wrapper">
-        <div class="terminal-header">
-            <div class="traffic-lights">
-                <div class="traffic-light"></div>
-                <div class="traffic-light"></div>
-                <div class="traffic-light"></div>
+
+    <div class="term">
+        <div class="term-bar">
+            <div class="dots">
+                <div class="dot r"></div>
+                <div class="dot y"></div>
+                <div class="dot g"></div>
             </div>
-            <div class="terminal-title">segmind@terminal: ~</div>
-            <div class="terminal-status">
-                <span>⚡ online</span>
-                <span id="statusTime"></span>
+            <span class="term-bar-title" id="barTitle">segmind@portfolio: ~</span>
+        </div>
+
+        <div class="term-body" id="body">
+            <div id="out"></div>
+            <div class="input-row">
+                <span class="ps1"><span class="u">segmind</span><span class="d">@</span><span
+                        class="h">portfolio</span><span class="d">:</span><span class="p" id="ps1Path">~</span><span
+                        class="s">$</span></span>
+                <input id="in" type="text" autofocus autocomplete="off" spellcheck="false">
+                <span class="cursor-block"></span>
             </div>
         </div>
 
-        <div class="terminal-body" id="terminalBody">
-            <div id="output">
-                <pre class="banner">
-   _____ _________ __  _____           __   ___  ______
-  / ___// ____/ _ \/  |/  (_)___  ____/ /  |__ \/ ____/
-  \__ \/ __/ / __ / /|_/ / / __ \/ __  /   __/ /___ \  
- ___/ / /___/ /_/ / /  / / / / / / /_/ /   / __/___/ /  
-/____/_____/\____/_/  /_/_/_/ /_/\__,_/   /____/_____/   
-                                                          
-            [ Advanced Terminal Portfolio v2.0 ]
-</pre>
-                <div class="welcome-msg">
-                    Welcome to <strong>SegMind25's Terminal Portfolio</strong><br>
-                    Type <span class="info">help</span> to see available commands<br>
-                    Use <span class="info">Tab</span> for autocomplete, <span class="info">↑/↓</span> for history<br>
-                    <span class="text-dim">Last login: <span id="loginTime"></span></span>
-                </div>
-            </div>
-
-            <div class="input-line">
-                <div class="prompt">
-                    <span class="prompt-user">segmind</span><span class="prompt-at">@</span><span
-                        class="prompt-host">portfolio</span><span class="prompt-colon">:</span><span class="prompt-path"
-                        id="currentPath">~</span><span class="prompt-symbol">$</span>
-                </div>
-                <div style="position: relative; flex: 1; min-width: 200px;">
-                    <input type="text" id="terminalInput" autocomplete="off" spellcheck="false" autofocus>
-                    <span class="autocomplete-hint" id="autocompleteHint"></span>
-                </div>
-                <span class="cursor"></span>
-            </div>
-        </div>
-
-        <div class="footer">
-            <span>UTF-8 | Linux x86_64</span>
+        <div class="term-foot">
+            <span>UTF-8 · bash</span>
             <span>© 2026 SegMind25</span>
-            <span id="footerTime"></span>
+            <span id="clock"></span>
         </div>
     </div>
 
     <script>
-        // Terminal State
-        const state = {
-            currentPath: '/home/segmind',
-            commandHistory: [],
-            historyIndex: -1,
-            fileSystem: null
-        };
-
-        // Initialize File System
-        const initFileSystem = () => ({
-            '/': {
-                type: 'dir',
+        // ─── Virtual File System ───
+        const FS = {
+            '/home/segmind': {
+                type: 'd',
                 children: {
-                    'home': {
-                        type: 'dir',
-                        children: {
-                            'segmind': {
-                                type: 'dir',
-                                children: {
-                                    'README.md': {
-                                        type: 'file',
-                                        content: `# Welcome to SegMind25's Portfolio
+                    'README.md': {
+                        type: 'f', content:
+                            `# SegMind25
+Linux enthusiast, content creator, developer.
 
-## About Me
-Hi! I'm SegMind25, a passionate content creator, developer, and Linux enthusiast.
+Quick Links:
+  gaming   →  youtube.com/@SegMind25
+  coding   →  youtube.com/@SegError
+  tiktok   →  tiktok.com/@segmind25
+  discord  →  discord.gg/WeUYH3x9Cr
+  github   →  github.com/SegMind25
+
+Type 'help' for all commands.` },
+                    'about.txt': {
+                        type: 'f', content:
+                            `SegMind25 — Linux Enthusiast & Content Architect
+
 I create content around gaming, coding, and technology.
+My goal is to help others learn and grow in the digital space.
 
-## Quick Links
-- Gaming: YouTube @SegMind25
-- Coding: YouTube @SegError  
-- TikTok: @segmind25
-- Discord: WeUYH3x9Cr
+Status:  Always Learning
+Location: The Internet` },
+                    'skills.txt': {
+                        type: 'f', content:
+                            `Development     Linux · HTML/CSS/JS · Git
+Content         YouTube · TikTok · OBS Studio
+Community       Discord Management · Streaming
+Other           Problem Solving · Video Editing` },
+                    'contact.txt': {
+                        type: 'f', content:
+                            `Gaming   youtube.com/@SegMind25
+Coding   youtube.com/@SegError
+TikTok   tiktok.com/@segmind25
+Discord  discord.gg/WeUYH3x9Cr
+GitHub   github.com/SegMind25` },
+                    'projects': {
+                        type: 'd',
+                        children: {
+                            'README.md': {
+                                type: 'f', content:
+                                    `Projects — github.com/SegMind25
 
-Type 'about' or 'contact' for more information!`
-                                    },
-                                    'about.txt': {
-                                        type: 'file',
-                                        content: `SegMind25 - Linux Enthusiast & Content Architect
-
-I'm a passionate creator who loves exploring the intersection of
-technology and creativity. My content spans across gaming, programming,
-and tech tutorials, helping others learn and grow in the digital space.
-
-Skills: Linux, Web Development, Content Creation, Gaming
-Location: Digital Realm
-Status: Always Learning`
-                                    },
-                                    'skills.txt': {
-                                        type: 'file',
-                                        content: `Technical Skills:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Linux Systems & Terminal
-• Web Development (HTML/CSS/JS)
-• Content Creation & Video Editing
-• Gaming & Streaming
-• Community Management
-• Problem Solving & Debugging
-
-Tools & Platforms:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• YouTube, TikTok, Discord
-• Git & GitHub
-• OBS Studio
-• Video Editing Software`
-                                    },
-                                    'contact.txt': {
-                                        type: 'file',
-                                        content: `Contact Information:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-📺 Gaming Channel:  youtube.com/@SegMind25
-💻 Coding Channel:  youtube.com/@SegError
-📱 TikTok:          tiktok.com/@segmind25
-💬 Discord:         discord.gg/WeUYH3x9Cr
-🐙 GitHub:          github.com/SegMind25
-
-Feel free to reach out on any platform!`
-                                    },
-                                    'projects': {
-                                        type: 'dir',
-                                        children: {
-                                            'README.md': {
-                                                type: 'file',
-                                                content: `My Projects
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Check out my work on GitHub:
-🔗 https://github.com/SegMind25
-
-Featured Projects:
-• Terminal Portfolio - Interactive web-based terminal
-• Tutorial Series - Educational content for learners
-• Community Tools - Discord bots and utilities
-
-Visit my GitHub for the complete list!`
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+• Terminal Portfolio   This interactive terminal
+• Tutorial Series      Educational content
+• Community Tools      Discord bots & utilities` }
                         }
                     }
                 }
             }
-        });
-
-        state.fileSystem = initFileSystem();
-
-        // DOM Elements
-        const terminalInput = document.getElementById('terminalInput');
-        const terminalBody = document.getElementById('terminalBody');
-        const output = document.getElementById('output');
-        const currentPathEl = document.getElementById('currentPath');
-        const autocompleteHint = document.getElementById('autocompleteHint');
-
-        // Helper Functions
-        const getNode = (path) => {
-            if (path === '/') return state.fileSystem['/'];
-
-            const parts = path.split('/').filter(p => p);
-            let current = state.fileSystem['/'];
-
-            for (const part of parts) {
-                if (!current.children || !current.children[part]) return null;
-                current = current.children[part];
-            }
-            return current;
         };
 
-        const resolvePath = (path) => {
-            if (path === '~') return '/home/segmind';
-            if (path.startsWith('~/')) return '/home/segmind' + path.slice(1);
-            if (path.startsWith('/')) return path;
+        // ─── State ────
+        let cwd = '/home/segmind';
+        let history = [];
+        let histIdx = -1;
 
-            // Relative path
-            let current = state.currentPath;
-            const parts = path.split('/');
+        // ─── DOM ───
+        const $out = document.getElementById('out');
+        const $in = document.getElementById('in');
+        const $body = document.getElementById('body');
+        const $path = document.getElementById('ps1Path');
+        const $bar = document.getElementById('barTitle');
+        const $clock = document.getElementById('clock');
 
-            for (const part of parts) {
-                if (part === '..') {
-                    current = current.split('/').slice(0, -1).join('/') || '/';
-                } else if (part === '.' || part === '') {
-                    continue;
-                } else {
-                    current = current === '/' ? `/${part}` : `${current}/${part}`;
+        // ─── Helpers ───
+        const esc = s => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+
+        const fmtPath = p => p === '/home/segmind' ? '~' : p.startsWith('/home/segmind/') ? '~/' + p.slice(14) : p;
+
+        const resolve = p => {
+            if (!p || p === '~') return '/home/segmind';
+            if (p.startsWith('~/')) p = '/home/segmind/' + p.slice(2);
+            if (!p.startsWith('/')) p = cwd === '/' ? '/' + p : cwd + '/' + p;
+            const parts = [], segs = p.split('/');
+            for (const s of segs) { if (s === '..') parts.pop(); else if (s && s !== '.') parts.push(s); }
+            return '/' + parts.join('/');
+        };
+
+        const getNode = path => {
+            // Find the closest FS root that is a prefix of path
+            for (const root of Object.keys(FS)) {
+                if (path === root) return FS[root];
+                if (path.startsWith(root + '/')) {
+                    let node = FS[root];
+                    const rel = path.slice(root.length + 1).split('/');
+                    for (const seg of rel) {
+                        if (!node.children || !node.children[seg]) return null;
+                        node = node.children[seg];
+                    }
+                    return node;
                 }
             }
-            return current;
+            return null;
         };
 
-        const formatPath = (path) => {
-            if (path === '/home/segmind') return '~';
-            if (path.startsWith('/home/segmind/')) return '~' + path.slice(13);
-            return path;
-        };
-
-        const addOutput = (html, className = '') => {
+        const print = (html) => {
             const div = document.createElement('div');
-            div.className = `output-line ${className}`;
+            div.className = 'line';
             div.innerHTML = html;
-            output.appendChild(div);
-            terminalBody.scrollTop = terminalBody.scrollHeight;
+            $out.appendChild(div);
         };
 
-        const addPrompt = (cmd) => {
-            addOutput(`<div class="prompt">
-                <span class="prompt-user">segmind</span><span class="prompt-at">@</span><span class="prompt-host">portfolio</span><span class="prompt-colon">:</span><span class="prompt-path">${formatPath(state.currentPath)}</span><span class="prompt-symbol">$</span> <span style="color: var(--text-primary)">${escapeHtml(cmd)}</span>
-            </div>`);
+        const printPrompt = cmd => {
+            print(`<span class="ps1"><span class="u">segmind</span><span class="d">@</span><span class="h">portfolio</span><span class="d">:</span><span class="p">${fmtPath(cwd)}</span><span class="s">$</span></span> ${esc(cmd)}`);
         };
 
-        const escapeHtml = (text) => {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        const scroll = () => { $body.scrollTop = $body.scrollHeight; };
+
+        const updatePath = () => {
+            const fp = fmtPath(cwd);
+            $path.textContent = fp;
+            $bar.textContent = `segmind@portfolio: ${fp}`;
         };
 
-        // Commands
-        const commands = {
-            help: () => {
-                return `<div class="cmd-output">
-<span class="info">Available Commands:</span>
+        // ─── Links ───
+        const LINKS = {
+            gaming: 'https://www.youtube.com/@SegMind25',
+            coding: 'https://www.youtube.com/@SegError',
+            tiktok: 'https://www.tiktok.com/@segmind25',
+            discord: 'https://discord.gg/WeUYH3x9Cr',
+            github: 'https://github.com/SegMind25',
+            projects: 'https://github.com/SegMind25',
+        };
 
-<strong>Navigation:</strong>
-  ls [-l] [-a] [path]     List directory contents
-  cd [path]               Change directory
-  pwd                     Print working directory
-  tree                    Display directory tree
+        // ─── Commands ───
+        const CMD = {
 
-<strong>File Operations:</strong>
-  cat [file]              Display file contents
-  touch [file]            Create empty file
-  mkdir [dir]             Create directory
-  rm [file/dir]           Remove file or directory
+            help: () => `<span class="out"><span class="c-cyan b">Commands</span>
 
-<strong>Utilities:</strong>
-  echo [text]             Print text to terminal
-  clear                   Clear terminal screen
-  history                 Show command history
-  date                    Display current date/time
-  whoami                  Display user information
+  <span class="c-yellow">ls</span> [-la] [path]      list files
+  <span class="c-yellow">cd</span> [path]            change directory
+  <span class="c-yellow">pwd</span>                  print working directory
+  <span class="c-yellow">cat</span> <file>           read file
+  <span class="c-yellow">tree</span>                 directory tree
+  <span class="c-yellow">touch</span> <name>          create file
+  <span class="c-yellow">mkdir</span> <name>          create directory
+  <span class="c-yellow">rm</span> <name>             remove file/directory
+  <span class="c-yellow">echo</span> <text>           print text
+  <span class="c-yellow">whoami</span>               who are you
+  <span class="c-yellow">date</span>                 current date
+  <span class="c-yellow">clear</span>                clear screen
+  <span class="c-yellow">history</span>              command history
+  <span class="c-yellow">neofetch</span>             system info
 
-<strong>Portfolio:</strong>
-  about                   About SegMind25
-  skills                  View skills
-  contact                 Contact information
-  socials                 Social media links
+  <span class="c-cyan b">Portfolio</span>
+  <span class="c-yellow">about</span>                about me
+  <span class="c-yellow">skills</span>               my skills
+  <span class="c-yellow">contact</span>              contact info
 
-<strong>Quick Links (Opens in new tab):</strong>
-  gaming                  YouTube Gaming Channel
-  coding                  YouTube Coding Channel
-  tiktok                  TikTok Profile
-  discord                 Discord Server
-  github / projects       GitHub Projects
-  
-<strong>Shortcuts:</strong>
-  Tab                     Autocomplete
-  ↑/↓                     Navigate history
-  Ctrl+L                  Clear screen
-  Ctrl+C                  Cancel input
-</div>`;
-            },
+  <span class="c-cyan b">Quick Links</span> <span class="c-dim">(opens in new tab)</span>
+  <span class="c-yellow">gaming</span>  <span class="c-yellow">coding</span>  <span class="c-yellow">tiktok</span>  <span class="c-yellow">discord</span>  <span class="c-yellow">github</span>
+
+  <span class="c-dim">Tab = autocomplete · ↑↓ = history · Ctrl+L = clear</span></span>`,
 
             ls: (args) => {
-                const flags = args.filter(a => a.startsWith('-'));
-                const pathArg = args.find(a => !a.startsWith('-')) || '.';
-                const targetPath = resolvePath(pathArg);
-                const node = getNode(targetPath);
-
-                if (!node) return `<div class="cmd-output error">ls: cannot access '${pathArg}': No such file or directory</div>`;
-                if (node.type !== 'dir') return `<div class="cmd-output error">ls: ${pathArg}: Not a directory</div>`;
-
-                const showLong = flags.includes('-l') || flags.includes('-la') || flags.includes('-al');
-                const showAll = flags.includes('-a') || flags.includes('-la') || flags.includes('-al');
-
-                let items = Object.keys(node.children || {});
-                if (showAll) items = ['.', '..', ...items];
-
-                if (items.length === 0) return '<div class="cmd-output"><!-- empty --></div>';
-
-                let result = '<div class="cmd-output">';
-                items.forEach(item => {
-                    const child = item === '.' || item === '..' ? node : node.children[item];
-                    const isDir = child && child.type === 'dir';
-                    const className = isDir ? 'directory' : 'file';
-
-                    if (showLong) {
-                        const perms = isDir ? 'drwxr-xr-x' : '-rw-r--r--';
-                        const size = isDir ? '4096' : (child.content ? child.content.length : '0');
-                        result += `${perms}  1 segmind segmind ${size.padStart(6)} Feb 11 21:00 <span class="${className}">${item}${isDir ? '/' : ''}</span><br>`;
-                    } else {
-                        result += `<span class="${className}">${item}${isDir ? '/' : ''}</span>  `;
-                    }
-                });
-                result += '</div>';
-                return result;
+                const flags = args.filter(a => a.startsWith('-')).join('');
+                const target = args.find(a => !a.startsWith('-'));
+                const path = resolve(target || '.');
+                const node = getNode(path);
+                if (!node) return `<span class="c-red">ls: ${esc(target)}: No such file or directory</span>`;
+                if (node.type !== 'd') return `<span class="c-red">ls: not a directory</span>`;
+                const names = Object.keys(node.children || {});
+                const showAll = flags.includes('a');
+                const showLong = flags.includes('l');
+                let items = showAll ? ['.', '..', ...names] : names;
+                if (!items.length) return '';
+                if (showLong) {
+                    return '<span class="out">' + items.map(n => {
+                        const ch = (n === '.' || n === '..') ? node : node.children[n];
+                        const isD = ch.type === 'd';
+                        const perm = isD ? 'drwxr-xr-x' : '-rw-r--r--';
+                        const sz = isD ? '4096' : String(ch.content?.length || 0).padStart(5);
+                        return `${perm}  segmind  ${sz}  <span class="${isD ? 'dir' : 'c-text'}">${n}${isD ? '/' : ''}</span>`;
+                    }).join('\n') + '</span>';
+                }
+                return '<span class="out">' + items.map(n => {
+                    const ch = (n === '.' || n === '..') ? node : node.children[n];
+                    return `<span class="${ch.type === 'd' ? 'dir' : 'c-text'}">${n}${ch.type === 'd' ? '/' : ''}</span>`;
+                }).join('  ') + '</span>';
             },
 
             cd: (args) => {
-                if (args.length === 0 || args[0] === '~') {
-                    state.currentPath = '/home/segmind';
-                    currentPathEl.textContent = '~';
-                    return '';
-                }
-
-                const targetPath = resolvePath(args[0]);
-                const node = getNode(targetPath);
-
-                if (!node) return `<div class="cmd-output error">cd: ${args[0]}: No such file or directory</div>`;
-                if (node.type !== 'dir') return `<div class="cmd-output error">cd: ${args[0]}: Not a directory</div>`;
-
-                state.currentPath = targetPath;
-                currentPathEl.textContent = formatPath(targetPath);
+                const target = resolve(args[0]);
+                const node = getNode(target);
+                if (!node) return `<span class="c-red">cd: ${esc(args[0] || '')}: No such file or directory</span>`;
+                if (node.type !== 'd') return `<span class="c-red">cd: not a directory</span>`;
+                cwd = target;
+                updatePath();
                 return '';
             },
 
-            pwd: () => {
-                return `<div class="cmd-output">${state.currentPath}</div>`;
-            },
+            pwd: () => `<span class="out">${cwd}</span>`,
 
             cat: (args) => {
-                if (args.length === 0) return `<div class="cmd-output error">cat: missing file operand</div>`;
-
-                const targetPath = resolvePath(args[0]);
-                const node = getNode(targetPath);
-
-                if (!node) return `<div class="cmd-output error">cat: ${args[0]}: No such file or directory</div>`;
-                if (node.type === 'dir') return `<div class="cmd-output error">cat: ${args[0]}: Is a directory</div>`;
-
-                return `<div class="cmd-output">${escapeHtml(node.content || '').replace(/\n/g, '<br>')}</div>`;
-            },
-
-            echo: (args) => {
-                return `<div class="cmd-output">${escapeHtml(args.join(' '))}</div>`;
-            },
-
-            clear: () => {
-                output.innerHTML = '';
-                return '';
-            },
-
-            pwd: () => {
-                return `<div class="cmd-output">${state.currentPath}</div>`;
-            },
-
-            whoami: () => {
-                return `<div class="cmd-output">
-<span class="success">segmind</span>
-SegMind25 - Linux Enthusiast & Content Architect
-</div>`;
-            },
-
-            date: () => {
-                return `<div class="cmd-output">${new Date().toString()}</div>`;
-            },
-
-            history: () => {
-                if (state.commandHistory.length === 0) return '<div class="cmd-output"><!-- no history --></div>';
-
-                let result = '<div class="cmd-output">';
-                state.commandHistory.forEach((cmd, i) => {
-                    result += `${String(i + 1).padStart(4)}  ${escapeHtml(cmd)}<br>`;
-                });
-                result += '</div>';
-                return result;
-            },
-
-            touch: (args) => {
-                if (args.length === 0) return `<div class="cmd-output error">touch: missing file operand</div>`;
-
-                const fileName = args[0];
-                const node = getNode(state.currentPath);
-
-                if (node.children[fileName]) {
-                    return `<div class="cmd-output warning">touch: '${fileName}' already exists</div>`;
-                }
-
-                node.children[fileName] = { type: 'file', content: '' };
-                return `<div class="cmd-output success">Created file: ${fileName}</div>`;
-            },
-
-            mkdir: (args) => {
-                if (args.length === 0) return `<div class="cmd-output error">mkdir: missing operand</div>`;
-
-                const dirName = args[0];
-                const node = getNode(state.currentPath);
-
-                if (node.children[dirName]) {
-                    return `<div class="cmd-output error">mkdir: cannot create directory '${dirName}': File exists</div>`;
-                }
-
-                node.children[dirName] = { type: 'dir', children: {} };
-                return `<div class="cmd-output success">Created directory: ${dirName}</div>`;
-            },
-
-            rm: (args) => {
-                if (args.length === 0) return `<div class="cmd-output error">rm: missing operand</div>`;
-
-                const itemName = args[0];
-                const node = getNode(state.currentPath);
-
-                if (!node.children[itemName]) {
-                    return `<div class="cmd-output error">rm: cannot remove '${itemName}': No such file or directory</div>`;
-                }
-
-                delete node.children[itemName];
-                return `<div class="cmd-output success">Removed: ${itemName}</div>`;
+                if (!args.length) return `<span class="c-red">cat: missing file operand</span>`;
+                const path = resolve(args[0]);
+                const node = getNode(path);
+                if (!node) return `<span class="c-red">cat: ${esc(args[0])}: No such file or directory</span>`;
+                if (node.type === 'd') return `<span class="c-red">cat: ${esc(args[0])}: Is a directory</span>`;
+                return `<span class="out">${esc(node.content || '')}</span>`;
             },
 
             tree: () => {
-                const buildTree = (node, prefix = '', isLast = true) => {
-                    let result = '';
-                    const items = Object.entries(node.children || {});
-
-                    items.forEach(([name, child], idx) => {
-                        const isLastItem = idx === items.length - 1;
-                        const connector = isLastItem ? '└── ' : '├── ';
-                        const className = child.type === 'dir' ? 'directory' : 'file';
-
-                        result += `${prefix}${connector}<span class="${className}">${name}${child.type === 'dir' ? '/' : ''}</span><br>`;
-
-                        if (child.type === 'dir') {
-                            const newPrefix = prefix + (isLastItem ? '    ' : '│   ');
-                            result += buildTree(child, newPrefix, isLastItem);
-                        }
+                const node = getNode(cwd);
+                let r = '<span class="out">.\n';
+                const walk = (n, prefix) => {
+                    const entries = Object.entries(n.children || {});
+                    entries.forEach(([name, child], i) => {
+                        const last = i === entries.length - 1;
+                        const connector = last ? '└── ' : '├── ';
+                        r += `${prefix}${connector}<span class="${child.type === 'd' ? 'dir' : 'c-text'}">${name}${child.type === 'd' ? '/' : ''}</span>\n`;
+                        if (child.type === 'd') walk(child, prefix + (last ? '    ' : '│   '));
                     });
-
-                    return result;
                 };
-
-                const node = getNode(state.currentPath);
-                return `<div class="cmd-output">.<br>${buildTree(node)}</div>`;
+                walk(node, '');
+                return r + '</span>';
             },
 
-            about: () => {
-                return `<div class="cmd-output">
-<span class="info">╔═══════════════════════════════════════╗</span>
-<span class="info">║</span>      <strong>About SegMind25</strong>              <span class="info">║</span>
-<span class="info">╚═══════════════════════════════════════╝</span>
-
-Hi! I'm SegMind25, a passionate content creator
-and Linux enthusiast. I create content around
-gaming, coding, and technology.
-
-<span class="success">What I Do:</span>
-• Gaming content & tutorials
-• Programming & web development
-• Tech reviews & Linux tips
-• Community engagement
-
-Type <span class="info">skills</span> or <span class="info">contact</span> for more info!
-</div>`;
+            touch: (args) => {
+                if (!args.length) return `<span class="c-red">touch: missing operand</span>`;
+                const node = getNode(cwd);
+                if (node.children[args[0]]) return `<span class="c-orange">'${esc(args[0])}' already exists</span>`;
+                node.children[args[0]] = { type: 'f', content: '' };
+                return '';
             },
 
-            skills: () => {
-                return `<div class="cmd-output">
-<span class="success">╔═══════════════════════════════════════╗</span>
-<span class="success">║</span>         <strong>Technical Skills</strong>           <span class="success">║</span>
-<span class="success">╚═══════════════════════════════════════╝</span>
-
-<span class="warning">Development:</span>
-  ▸ Linux Systems & Terminal
-  ▸ Web Development (HTML/CSS/JS)
-  ▸ Git & Version Control
-  
-<span class="warning">Content Creation:</span>
-  ▸ Video Editing & Production
-  ▸ Live Streaming (OBS)
-  ▸ Community Management
-  
-<span class="warning">Gaming & Tech:</span>
-  ▸ Gaming Content Creation
-  ▸ Tech Tutorials
-  ▸ Problem Solving
-</div>`;
+            mkdir: (args) => {
+                if (!args.length) return `<span class="c-red">mkdir: missing operand</span>`;
+                const node = getNode(cwd);
+                if (node.children[args[0]]) return `<span class="c-red">mkdir: '${esc(args[0])}': File exists</span>`;
+                node.children[args[0]] = { type: 'd', children: {} };
+                return '';
             },
 
-            contact: () => {
-                return `<div class="cmd-output">
-<span class="info">╔═══════════════════════════════════════╗</span>
-<span class="info">║</span>      <strong>Contact Information</strong>           <span class="info">║</span>
-<span class="info">╚═══════════════════════════════════════╝</span>
-
-<span class="warning">Social Media:</span>
-  📺 Gaming:  <span class="link" onclick="window.open('https://www.youtube.com/@SegMind25', '_blank')">youtube.com/@SegMind25</span>
-  💻 Coding:  <span class="link" onclick="window.open('https://www.youtube.com/@SegError', '_blank')">youtube.com/@SegError</span>
-  📱 TikTok:  <span class="link" onclick="window.open('https://www.tiktok.com/@segmind25', '_blank')">tiktok.com/@segmind25</span>
-  💬 Discord: <span class="link" onclick="window.open('https://discord.gg/WeUYH3x9Cr', '_blank')">discord.gg/WeUYH3x9Cr</span>
-  🐙 GitHub:  <span class="link" onclick="window.open('https://github.com/SegMind25', '_blank')">github.com/SegMind25</span>
-
-Feel free to reach out on any platform!
-</div>`;
+            rm: (args) => {
+                if (!args.length) return `<span class="c-red">rm: missing operand</span>`;
+                const node = getNode(cwd);
+                if (!node.children[args[0]]) return `<span class="c-red">rm: '${esc(args[0])}': No such file or directory</span>`;
+                delete node.children[args[0]];
+                return '';
             },
 
-            socials: () => {
-                return commands.contact();
+            echo: (args) => `<span class="out">${esc(args.join(' '))}</span>`,
+            whoami: () => `<span class="out"><span class="c-green b">segmind</span> — Linux Enthusiast & Content Architect</span>`,
+            date: () => `<span class="out">${new Date().toString()}</span>`,
+
+            clear: () => { $out.innerHTML = ''; return ''; },
+
+            history: () => {
+                if (!history.length) return '';
+                return '<span class="out">' + history.map((c, i) => `${String(i + 1).padStart(4)}  ${esc(c)}`).join('\n') + '</span>';
             },
 
-            neofetch: () => {
-                return `<div class="cmd-output">
-<span class="info">       _,met$$$$$gg.</span>          <span class="warning">segmind</span>@<span class="success">portfolio</span>
-<span class="info">    ,g$$$$$$$$$$$$$$$P.</span>       ───────────────────
-<span class="info">  ,g$$P"     """Y$$.\".</span>       <span class="warning">OS:</span> SegMindOS (Web-Based)
-<span class="info"> ,$$P'              \`$$$.</span>     <span class="warning">Kernel:</span> Virtual Terminal v2.0
-<span class="info">',$$P       ,ggs.     \`$$b:</span>   <span class="warning">Shell:</span> bash 5.1.16
-<span class="info">\`d$$'     ,$P"'   .    $$$</span>    <span class="warning">Terminal:</span> JetBrains Mono
-<span class="info"> $$P      d$'     ,    $$P</span>    <span class="warning">Uptime:</span> <span id="uptime">0 mins</span>
-<span class="info"> $$:      $$.   -    ,d$$'</span>    <span class="warning">Packages:</span> 20+ commands
-<span class="info"> $$;      Y$b._   _,d$P'</span>      <span class="warning">Memory:</span> Infinite
-<span class="info"> Y$$.    \`.\`"Y$$$P"'</span>         <span class="warning">CPU:</span> Your Browser
-<span class="info"> \`$$b      "-.__</span>
-<span class="info">  \`Y$$</span>                        <span class="success">████</span><span class="warning">████</span><span class="error">████</span><span class="info">████</span>
-<span class="info">   \`Y$$.</span>
-<span class="info">     \`$$b.</span>
-<span class="info">       \`Y$$b.</span>
-<span class="info">          \`"Y$b._</span>
-<span class="info">              \`"""</span>
-</div>`;
-            },
+            neofetch: () => `<span class="out"><span class="c-green b">segmind</span><span class="c-dim">@</span><span class="c-blue b">portfolio</span>
+───────────────────
+<span class="c-yellow">OS</span>        SegMindOS (Web)
+<span class="c-yellow">Kernel</span>    Terminal v3.0
+<span class="c-yellow">Shell</span>     bash 5.1
+<span class="c-yellow">Terminal</span>  JetBrains Mono
+<span class="c-yellow">Uptime</span>    since you got here
+<span class="c-yellow">Packages</span>  20+ commands
+<span class="c-yellow">CPU</span>       Your Browser
 
-            // Quick Link Commands - Opens URLs directly
-            gaming: () => {
-                window.open('https://www.youtube.com/@SegMind25', '_blank');
-                return `<div class="cmd-output success">🎮 Opening YouTube Gaming Channel (@SegMind25)...</div>`;
-            },
+<span class="c-green">████</span><span class="c-yellow">████</span><span class="c-red">████</span><span class="c-blue">████</span><span class="c-purple">████</span></span>`,
 
-            coding: () => {
-                window.open('https://www.youtube.com/@SegError', '_blank');
-                return `<div class="cmd-output success">💻 Opening YouTube Coding Channel (@SegError)...</div>`;
-            },
+            about: () => `<span class="out"><span class="c-cyan b">About</span>
 
-            tiktok: () => {
-                window.open('https://www.tiktok.com/@segmind25', '_blank');
-                return `<div class="cmd-output success">📱 Opening TikTok Profile (@segmind25)...</div>`;
-            },
+Hi, I'm <span class="c-green b">SegMind25</span>.
+Linux enthusiast, content creator, and developer.
 
-            discord: () => {
-                window.open('https://discord.gg/WeUYH3x9Cr', '_blank');
-                return `<div class="cmd-output success">💬 Opening Discord Server...</div>`;
-            },
+I make gaming & coding content on YouTube,
+share short-form on TikTok, and build tools on GitHub.
 
-            github: () => {
-                window.open('https://github.com/SegMind25', '_blank');
-                return `<div class="cmd-output success">🐙 Opening GitHub Profile (SegMind25)...</div>`;
-            },
+Type <span class="c-yellow">contact</span> for links or <span class="c-yellow">skills</span> to see what I do.</span>`,
 
-            projects: () => {
-                window.open('https://github.com/SegMind25', '_blank');
-                return `<div class="cmd-output success">🚀 Opening GitHub Projects (SegMind25)...</div>`;
-            },
+            skills: () => `<span class="out"><span class="c-cyan b">Skills</span>
 
-            youtube: () => {
-                return `<div class="cmd-output info">📺 Which channel? Try: <span class="warning">gaming</span> or <span class="warning">coding</span></div>`;
-            }
+<span class="c-yellow">Development</span>   Linux · HTML/CSS/JS · Git
+<span class="c-yellow">Content</span>       YouTube · TikTok · OBS Studio
+<span class="c-yellow">Community</span>     Discord · Streaming
+<span class="c-yellow">Other</span>         Problem Solving · Video Editing</span>`,
+
+            contact: () => `<span class="out"><span class="c-cyan b">Contact</span>
+
+  📺  <span class="lnk" onclick="open('${LINKS.gaming}')">youtube.com/@SegMind25</span>  <span class="c-dim">(gaming)</span>
+  💻  <span class="lnk" onclick="open('${LINKS.coding}')">youtube.com/@SegError</span>  <span class="c-dim">(coding)</span>
+  📱  <span class="lnk" onclick="open('${LINKS.tiktok}')">tiktok.com/@segmind25</span>
+  💬  <span class="lnk" onclick="open('${LINKS.discord}')">discord.gg/WeUYH3x9Cr</span>
+  🐙  <span class="lnk" onclick="open('${LINKS.github}')">github.com/SegMind25</span></span>`,
+
+            // Quick link commands
+            gaming: () => { window.open(LINKS.gaming, '_blank'); return `<span class="c-green">Opening YouTube Gaming…</span>`; },
+            coding: () => { window.open(LINKS.coding, '_blank'); return `<span class="c-green">Opening YouTube Coding…</span>`; },
+            tiktok: () => { window.open(LINKS.tiktok, '_blank'); return `<span class="c-green">Opening TikTok…</span>`; },
+            discord: () => { window.open(LINKS.discord, '_blank'); return `<span class="c-green">Opening Discord…</span>`; },
+            github: () => { window.open(LINKS.github, '_blank'); return `<span class="c-green">Opening GitHub…</span>`; },
+            projects: () => { window.open(LINKS.projects, '_blank'); return `<span class="c-green">Opening GitHub Projects…</span>`; },
+            socials: () => CMD.contact(),
+            youtube: () => `<span class="out">Which channel? <span class="c-yellow">gaming</span> or <span class="c-yellow">coding</span></span>`,
         };
 
-        // Execute Command
-        const executeCommand = (input) => {
-            const trimmed = input.trim();
+        const ALL_CMDS = Object.keys(CMD);
+
+        // ─── Execute ───
+        const exec = raw => {
+            const trimmed = raw.trim();
             if (!trimmed) return;
-
-            state.commandHistory.push(trimmed);
-            state.historyIndex = -1;
-
-            addPrompt(trimmed);
+            history.push(trimmed);
+            histIdx = -1;
+            printPrompt(trimmed);
 
             const parts = trimmed.split(/\s+/);
             const cmd = parts[0].toLowerCase();
             const args = parts.slice(1);
 
-            if (commands[cmd]) {
-                const result = commands[cmd](args);
-                if (result) output.innerHTML += result;
+            if (CMD[cmd]) {
+                const out = CMD[cmd](args);
+                if (out) print(out);
             } else {
-                addOutput(`<div class="cmd-output error">bash: ${escapeHtml(cmd)}: command not found</div>`);
+                print(`<span class="c-red">bash: ${esc(cmd)}: command not found</span>`);
             }
-
-            terminalBody.scrollTop = terminalBody.scrollHeight;
+            scroll();
         };
 
-        // Autocomplete
-        const getCompletions = (input) => {
-            const parts = input.split(/\s+/);
-            const cmdPart = parts[0];
-
-            if (parts.length === 1) {
-                // Command completion
-                return Object.keys(commands).filter(cmd => cmd.startsWith(cmdPart.toLowerCase()));
-            } else {
-                // Path completion (basic)
-                const node = getNode(state.currentPath);
-                if (!node.children) return [];
-
-                const lastArg = parts[parts.length - 1];
-                return Object.keys(node.children).filter(name => name.startsWith(lastArg));
+        // ─── Tab Completion ───
+        const complete = val => {
+            const parts = val.split(/\s+/);
+            const partial = parts[parts.length - 1].toLowerCase();
+            if (parts.length <= 1) {
+                return ALL_CMDS.filter(c => c.startsWith(partial));
             }
+            const node = getNode(cwd);
+            if (!node || !node.children) return [];
+            return Object.keys(node.children).filter(n => n.toLowerCase().startsWith(partial));
         };
 
-        // Event Listeners
-        terminalInput.addEventListener('input', (e) => {
-            const completions = getCompletions(e.target.value);
-            if (completions.length > 0 && e.target.value) {
-                const parts = e.target.value.split(/\s+/);
-                const lastPart = parts[parts.length - 1];
-                const match = completions[0];
-
-                if (match.startsWith(lastPart)) {
-                    autocompleteHint.textContent = e.target.value + match.slice(lastPart.length);
-                    autocompleteHint.style.left = (e.target.value.length * 9.6) + 'px';
-                } else {
-                    autocompleteHint.textContent = '';
-                }
-            } else {
-                autocompleteHint.textContent = '';
-            }
-        });
-
-        terminalInput.addEventListener('keydown', (e) => {
-            // Tab completion
+        // ─── Input Handling ───
+        $in.addEventListener('keydown', e => {
             if (e.key === 'Tab') {
                 e.preventDefault();
-                const completions = getCompletions(e.target.value);
-                if (completions.length === 1) {
-                    const parts = e.target.value.split(/\s+/);
-                    parts[parts.length - 1] = completions[0];
-                    e.target.value = parts.join(' ');
-                    autocompleteHint.textContent = '';
+                const val = $in.value;
+                if (!val) return;
+                const matches = complete(val);
+                if (matches.length === 1) {
+                    const parts = val.split(/\s+/);
+                    parts[parts.length - 1] = matches[0];
+                    $in.value = parts.join(' ');
+                } else if (matches.length > 1) {
+                    // Show all matches
+                    printPrompt(val);
+                    print('<span class="out">' + matches.join('  ') + '</span>');
+                    scroll();
                 }
+                return;
             }
 
-            // Enter to execute
             if (e.key === 'Enter') {
-                executeCommand(e.target.value);
-                e.target.value = '';
-                autocompleteHint.textContent = '';
+                exec($in.value);
+                $in.value = '';
+                return;
             }
 
-            // History navigation
             if (e.key === 'ArrowUp') {
                 e.preventDefault();
-                if (state.historyIndex < state.commandHistory.length - 1) {
-                    state.historyIndex++;
-                    e.target.value = state.commandHistory[state.commandHistory.length - 1 - state.historyIndex];
+                if (histIdx < history.length - 1) {
+                    histIdx++;
+                    $in.value = history[history.length - 1 - histIdx];
                 }
+                return;
             }
 
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                if (state.historyIndex > 0) {
-                    state.historyIndex--;
-                    e.target.value = state.commandHistory[state.commandHistory.length - 1 - state.historyIndex];
-                } else if (state.historyIndex === 0) {
-                    state.historyIndex = -1;
-                    e.target.value = '';
+                if (histIdx > 0) {
+                    histIdx--;
+                    $in.value = history[history.length - 1 - histIdx];
+                } else {
+                    histIdx = -1;
+                    $in.value = '';
                 }
+                return;
             }
 
-            // Ctrl+L to clear
             if (e.ctrlKey && e.key === 'l') {
                 e.preventDefault();
-                executeCommand('clear');
+                CMD.clear();
+                return;
             }
 
-            // Ctrl+C to clear input
             if (e.ctrlKey && e.key === 'c') {
                 e.preventDefault();
-                e.target.value = '';
-                autocompleteHint.textContent = '';
+                printPrompt($in.value + '^C');
+                $in.value = '';
+                scroll();
+                return;
             }
         });
 
-        // Click anywhere to focus input
-        document.addEventListener('click', (e) => {
-            if (e.target !== terminalInput) {
-                terminalInput.focus();
-            }
-        });
+        // ─── Focus ───
+        document.addEventListener('click', () => $in.focus());
 
-        // Initialize
-        const init = () => {
-            const now = new Date();
-            document.getElementById('loginTime').textContent = now.toLocaleString();
+        // ─── Clock ───
+        const tick = () => { $clock.textContent = new Date().toLocaleTimeString(); };
+        tick();
+        setInterval(tick, 1000);
 
-            // Update status time
-            const updateTime = () => {
-                const statusTime = document.getElementById('statusTime');
-                const footerTime = document.getElementById('footerTime');
-                const time = new Date().toLocaleTimeString();
-                if (statusTime) statusTime.textContent = time;
-                if (footerTime) footerTime.textContent = time;
-            };
-            updateTime();
-            setInterval(updateTime, 1000);
+        // ─── Welcome ───
+        print(`<span class="c-text b">SegMind25</span> <span class="c-dim">— Terminal Portfolio</span>`);
+        print(`<span class="c-dim">Last login: ${new Date().toLocaleString()}</span>`);
+        print(`<span class="c-dim">Type</span> <span class="c-yellow">help</span> <span class="c-dim">to get started.</span>`);
+        print('');
 
-            // Focus input
-            terminalInput.focus();
-        };
-
-        init();
+        $in.focus();
     </script>
+
 </body>
 
 </html>
