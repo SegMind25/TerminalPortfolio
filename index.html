@@ -369,6 +369,64 @@
       .neo-wrap { grid-template-columns:1fr; }
       .neo-logo { display:none; }
     }
+
+    /* ══════════════════════════════════════════
+       EXIT OVERLAY
+    ══════════════════════════════════════════ */
+    .exit-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s ease;
+    }
+    .exit-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .exit-icon {
+      font-size: 36px;
+      animation: exitPulse .9s ease-in-out infinite;
+    }
+    @keyframes exitPulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:.5; transform:scale(.92); }
+    }
+    .exit-text {
+      font-family: var(--font);
+      font-size: 14px;
+      color: var(--green);
+      letter-spacing: .1em;
+      text-shadow: var(--glow-green);
+    }
+    .exit-sub {
+      font-family: var(--font);
+      font-size: 11px;
+      color: var(--dim2);
+      letter-spacing: .06em;
+    }
+    .exit-bar-wrap {
+      width: 220px;
+      height: 3px;
+      background: var(--border2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .exit-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--green2), var(--green));
+      box-shadow: var(--glow-green);
+      border-radius: 2px;
+      transition: width 1.8s linear;
+    }
   </style>
 </head>
 <body>
@@ -414,6 +472,14 @@
     <span id="clock"></span>
   </div>
 
+</div>
+
+<!-- ── Exit Overlay ── -->
+<div class="exit-overlay" id="exitOverlay">
+  <div class="exit-icon">⏻</div>
+  <div class="exit-text">Logging out of segmind@portfolio</div>
+  <div class="exit-bar-wrap"><div class="exit-bar-fill" id="exitBar"></div></div>
+  <div class="exit-sub" id="exitSub">Closing session…</div>
 </div>
 
 <script>
@@ -584,6 +650,7 @@ const CMD = {
 <div class="help-row"><span class="help-cmd">history</span><span class="help-desc">show command history</span></div>
 <div class="help-row"><span class="help-cmd">neofetch</span><span class="help-desc">system / portfolio info</span></div>
 <div class="help-row"><span class="help-cmd">clear</span><span class="help-desc">clear the terminal</span></div>
+<div class="help-row"><span class="help-cmd">exit</span><span class="help-desc">close this tab (logout alias works too)</span></div>
 
 <div class="help-title" style="margin-top:8px">── Portfolio ───────────────────────</div>
 <div class="help-row"><span class="help-cmd">about</span><span class="help-desc">who is SegMind25?</span></div>
@@ -841,6 +908,33 @@ const CMD = {
   /* ── aliases ── */
   socials:  () => CMD.contact(),
   youtube:  () => `<div class="out">Which channel? <span class="c-y">gaming</span> (youtube.com/@SegMind25) or <span class="c-y">coding</span> (youtube.com/@SegError)</div>`,
+
+  /* ── exit / logout ── */
+  exit: () => {
+    setTimeout(() => {
+      const overlay = document.getElementById('exitOverlay');
+      const bar     = document.getElementById('exitBar');
+      const sub     = document.getElementById('exitSub');
+      overlay.classList.add('visible');
+      // Trigger bar fill on next frame
+      requestAnimationFrame(() => { bar.style.width = '100%'; });
+      const msgs = ['Saving session state…', 'Flushing buffers…', 'Closing session…', 'Goodbye! 👋'];
+      let i = 0;
+      const t = setInterval(() => {
+        if (i < msgs.length) { sub.textContent = msgs[i++]; }
+        else { clearInterval(t); }
+      }, 480);
+      // Try window.close after animation — works only if tab was opened by script
+      setTimeout(() => {
+        window.close();
+        // Fallback: show a final message if close was blocked
+        sub.textContent = 'Tab close blocked by browser — please close manually.';
+        sub.style.color = 'var(--yellow)';
+      }, 2200);
+    }, 80);
+    return `<span class="c-g">logout</span> <span class="c-dim">— terminating session…</span>`;
+  },
+  logout: () => CMD.exit(),
 };
 
 const ALL_CMDS = Object.keys(CMD);
