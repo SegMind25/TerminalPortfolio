@@ -1,3 +1,40 @@
+# Terminal Portfolio — creative experience update
+
+The single-file `index.html` now includes an animated boot, command typewriter,
+five themes (matrix, cyberpunk, vaporwave, monochrome, solarized), and eight UI
+languages (en, fr, ar, ja, zh, es, de, pt), including Arabic RTL support.
+
+New commands include `theme`, `lang`, `play` (ASCII Snake), `hack`, `cat resume`,
+and `sudo hire me`. Existing filesystem commands, history, completion, content,
+and social links are preserved. `projects` now displays an interactive gallery
+with modal details and the original GitHub destination. `resetfs confirm` restores
+the virtual filesystem. File operations affect only the in-memory simulation.
+
+Open `index.html` directly in a modern browser, or serve it over HTTP. No build
+step is required. GSAP 3.13, Three.js r168, Tone.js 15.1.22, and fonts load from
+CDNs. Advanced effects degrade to WAAPI/CSS/Canvas when unavailable; core commands
+work without those network resources. WebGPU falls back to WebGL2, then Canvas.
+Signals and function decorators use browser-compatible JavaScript helpers.
+
+Sound is off by default; enable it with the title-bar audio button. The yellow
+window button toggles effects. Reduced-motion settings suppress animations.
+Escape skips boot or exits Snake; Ctrl+C cancels an operation; Ctrl+L clears.
+Project dialogs support Escape and restore keyboard focus.
+
+Owner contact configuration is near the start of the inline script. No email
+address or downloadable resume was supplied, so their availability is stated
+honestly until `owner.email` and `owner.resume` are configured.
+
+Validation: Chromium/Brave direct-file and HTTP browser checks covered existing
+commands, file mutations, all themes and languages, Arabic RTL, Snake, dialogs,
+completion/history, reduced motion, blocked CDNs, live libraries/audio, and
+320px/mobile/tablet layouts. No uncaught page errors in these checks. Native
+WebGPU hardware, Safari, Firefox, and physical mobile keyboards were not tested.
+
+The original project documentation is retained below.
+
+---
+
 # 🚀 SegMind25 | Advanced Terminal Portfolio v2.0
 
 Welcome to **SegMind25's Interactive Terminal Portfolio** — a fully-featured, browser-based terminal emulator that showcases my work, skills, and projects in the most authentic Linux terminal experience possible.

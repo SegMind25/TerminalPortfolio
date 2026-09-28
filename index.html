@@ -1,1110 +1,1120 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-theme="matrix">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>segmind@portfolio: ~</title>
-  <meta name="description" content="SegMind25 — Interactive Terminal Portfolio v3.0" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fira+Code:wght@300;400;500;700&display=swap" rel="stylesheet" />
-  <style>
-    /* ══════════════════════════════════════════
-       DESIGN TOKENS
-    ══════════════════════════════════════════ */
-    :root {
-      --bg:        #080b0f;
-      --surface:   #0d1117;
-      --surface2:  #111820;
-      --border:    #1e2a35;
-      --border2:   #243040;
-      --text:      #c9d1d9;
-      --dim:       #4a5568;
-      --dim2:      #6b7a90;
-
-      --green:     #39d353;
-      --green2:    #26a641;
-      --blue:      #58a6ff;
-      --blue2:     #388bfd;
-      --yellow:    #e3b341;
-      --red:       #f85149;
-      --purple:    #bc8cff;
-      --orange:    #ffa657;
-      --cyan:      #79c0ff;
-      --teal:      #2ea043;
-
-      --glow-green: 0 0 8px rgba(57,211,83,0.35);
-      --glow-blue:  0 0 8px rgba(88,166,255,0.35);
-
-      --radius:    10px;
-      --font:      'JetBrains Mono', 'Fira Code', monospace;
-    }
-
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
-    html { height: 100%; }
-
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      /* subtle noise grain */
-      background-image:
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(88,166,255,0.06) 0%, transparent 60%),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    }
-
-    /* ══════════════════════════════════════════
-       TERMINAL SHELL
-    ══════════════════════════════════════════ */
-    .term {
-      width: 940px;
-      height: 640px;
-      max-width: 97vw;
-      max-height: 94dvh;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,0.04) inset,
-        0 40px 100px rgba(0,0,0,0.7),
-        0 0 40px rgba(57,211,83,0.04);
-      animation: termIn .4s cubic-bezier(.16,1,.3,1) both;
-      position: relative;
-    }
-    @keyframes termIn {
-      from { opacity:0; transform:translateY(18px) scale(.98); }
-      to   { opacity:1; transform:none; }
-    }
-
-    /* scanlines overlay */
-    .term::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.07) 2px,
-        rgba(0,0,0,0.07) 4px
-      );
-      pointer-events: none;
-      z-index: 10;
-      border-radius: var(--radius);
-    }
-
-    /* ── Title Bar ── */
-    .term-bar {
-      height: 40px;
-      background: var(--surface2);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      flex-shrink: 0;
-      position: relative;
-      user-select: none;
-    }
-
-    .dots { display:flex; gap:8px; }
-    .dot {
-      width: 12px; height: 12px;
-      border-radius: 50%;
-      background: #2a3441;
-      transition: background .2s, box-shadow .2s;
-    }
-    .term:hover .dot.r { background:#ff5f57; box-shadow:0 0 6px rgba(255,95,87,.5); }
-    .term:hover .dot.y { background:#febc2e; box-shadow:0 0 6px rgba(254,188,46,.5); }
-    .term:hover .dot.g { background:#28c840; box-shadow:0 0 6px rgba(40,200,64,.5); }
-
-    .bar-center {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11.5px;
-      color: var(--dim2);
-      letter-spacing: .03em;
-    }
-    .bar-icon { color: var(--green); font-size: 10px; }
-    #barTitle { color: var(--dim2); }
-
-    .bar-right {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .bar-badge {
-      font-size: 10px;
-      color: var(--dim);
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border2);
-      border-radius: 4px;
-      padding: 1px 7px;
-      letter-spacing: .05em;
-    }
-
-    /* ── Body ── */
-    .term-body {
-      flex: 1;
-      padding: 18px 22px 12px;
-      overflow-y: auto;
-      font-size: 13px;
-      line-height: 1.7;
-      scroll-behavior: smooth;
-      position: relative;
-    }
-    .term-body::-webkit-scrollbar { width: 5px; }
-    .term-body::-webkit-scrollbar-track { background: transparent; }
-    .term-body::-webkit-scrollbar-thumb { background:#1e2a35; border-radius:4px; }
-    .term-body::-webkit-scrollbar-thumb:hover { background:#2a3a4a; }
-
-    /* ── Footer ── */
-    .term-foot {
-      height: 26px;
-      background: var(--surface2);
-      border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      font-size: 10px;
-      color: var(--dim);
-      flex-shrink: 0;
-      letter-spacing: .04em;
-    }
-    .foot-seg {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .foot-dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: var(--glow-green);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%,100% { opacity:1; }
-      50%      { opacity:.4; }
-    }
-
-    /* ══════════════════════════════════════════
-       PROMPT & INPUT
-    ══════════════════════════════════════════ */
-    .line {
-      margin-bottom: 2px;
-      white-space: pre-wrap;
-      word-break: break-all;
-      animation: fadeIn .12s ease both;
-    }
-    @keyframes fadeIn {
-      from { opacity:0; transform:translateY(2px); }
-      to   { opacity:1; transform:none; }
-    }
-
-    .ps1 .u { color: var(--green);  font-weight:700; }
-    .ps1 .at{ color: var(--dim2); }
-    .ps1 .h { color: var(--blue);   font-weight:700; }
-    .ps1 .c { color: var(--dim2); }
-    .ps1 .d { color: var(--purple); font-weight:500; }
-    .ps1 .s { color: var(--yellow); font-weight:700; }
-
-    .input-row {
-      display: flex;
-      align-items: center;
-      margin-top: 2px;
-    }
-    #in {
-      flex: 1;
-      background: none;
-      border: none;
-      color: var(--text);
-      font: inherit;
-      outline: none;
-      caret-color: transparent;
-      margin-left: 7px;
-    }
-    .cursor-block {
-      display: inline-block;
-      width: 8px; height: 14px;
-      background: var(--green);
-      box-shadow: var(--glow-green);
-      animation: blink 1.1s step-end infinite;
-      vertical-align: middle;
-      margin-left: 1px;
-      border-radius: 1px;
-    }
-    @keyframes blink { 50%{ opacity:0; } }
-
-    /* ══════════════════════════════════════════
-       OUTPUT COLOUR TOKENS
-    ══════════════════════════════════════════ */
-    .out   { color:#a0b0c0; padding-left:2px; }
-    .c-g   { color:var(--green); }
-    .c-b   { color:var(--blue); }
-    .c-y   { color:var(--yellow); }
-    .c-r   { color:var(--red); }
-    .c-p   { color:var(--purple); }
-    .c-o   { color:var(--orange); }
-    .c-c   { color:var(--cyan); }
-    .c-dim { color:var(--dim2); }
-    .c-tx  { color:var(--text); }
-    .b     { font-weight:700; }
-    .dir   { color:var(--blue); font-weight:700; }
-    .sym   { color:var(--cyan); }
-
-    /* clickable link */
-    .lnk {
-      color:var(--text);
-      cursor:pointer;
-      border-bottom:1px dashed var(--dim);
-      transition:color .15s, border-color .15s;
-    }
-    .lnk:hover { color:var(--green); border-color:var(--green); }
-
-    /* ══════════════════════════════════════════
-       TAB COMPLETION MENU
-    ══════════════════════════════════════════ */
-    .tab-menu {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 3px 8px;
-      margin: 5px 0;
-      padding: 6px 10px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border2);
-      border-radius: 6px;
-    }
-    .tab-item {
-      padding: 2px 8px;
-      border-radius: 4px;
-      color: var(--text);
-      font-size: 12px;
-      transition: background .1s, color .1s;
-    }
-    .tab-item.active {
-      background: var(--blue2);
-      color: #fff;
-      font-weight: 700;
-    }
-
-    /* ══════════════════════════════════════════
-       HELP TABLE / SECTIONS
-    ══════════════════════════════════════════ */
-    .help-section { margin-bottom: 10px; }
-    .help-title {
-      color: var(--cyan);
-      font-weight: 700;
-      letter-spacing: .08em;
-      margin-bottom: 4px;
-      font-size: 11px;
-      text-transform: uppercase;
-    }
-    .help-row {
-      display: grid;
-      grid-template-columns: 180px 1fr;
-      gap: 0 8px;
-      padding: 1px 0;
-    }
-    .help-cmd  { color: var(--yellow); }
-    .help-desc { color: var(--dim2); }
-
-    /* ══════════════════════════════════════════
-       NEOFETCH LAYOUT
-    ══════════════════════════════════════════ */
-    .neo-wrap {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 0 24px;
-      font-size: 12.5px;
-    }
-    .neo-logo { white-space: pre; line-height: 1.25; }
-    .neo-info { padding-top: 4px; }
-    .neo-row { display: grid; grid-template-columns: 100px 1fr; gap: 0 6px; }
-    .neo-key { color: var(--blue); font-weight: 700; }
-    .neo-sep { color: var(--dim2); }
-    .neo-val { color: var(--text); }
-    .neo-bar { margin-top: 8px; letter-spacing: -.5px; }
-
-    /* ══════════════════════════════════════════
-       WELCOME BANNER
-    ══════════════════════════════════════════ */
-    .banner-art {
-      white-space: pre;
-      line-height: 1.2;
-      font-size: 11px;
-      color: var(--green);
-      text-shadow: 0 0 12px rgba(57,211,83,0.4);
-    }
-    .banner-divider {
-      color: var(--border2);
-      margin: 6px 0 4px;
-    }
-    .banner-info { font-size: 12px; }
-
-    /* ══════════════════════════════════════════
-       MOBILE
-    ══════════════════════════════════════════ */
-    @media (max-width:600px) {
-      .term {
-        width:100%; height:100dvh;
-        max-width:none; max-height:none;
-        border:none; border-radius:0;
-      }
-      .term-body { font-size:11.5px; padding:12px 14px; }
-      .banner-art { font-size:7px; }
-      .neo-wrap { grid-template-columns:1fr; }
-      .neo-logo { display:none; }
-    }
-
-    /* ══════════════════════════════════════════
-       EXIT OVERLAY
-    ══════════════════════════════════════════ */
-    .exit-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: var(--bg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 18px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .35s ease;
-    }
-    .exit-overlay.visible {
-      opacity: 1;
-      pointer-events: all;
-    }
-    .exit-icon {
-      font-size: 36px;
-      animation: exitPulse .9s ease-in-out infinite;
-    }
-    @keyframes exitPulse {
-      0%,100% { opacity:1; transform:scale(1); }
-      50%      { opacity:.5; transform:scale(.92); }
-    }
-    .exit-text {
-      font-family: var(--font);
-      font-size: 14px;
-      color: var(--green);
-      letter-spacing: .1em;
-      text-shadow: var(--glow-green);
-    }
-    .exit-sub {
-      font-family: var(--font);
-      font-size: 11px;
-      color: var(--dim2);
-      letter-spacing: .06em;
-    }
-    .exit-bar-wrap {
-      width: 220px;
-      height: 3px;
-      background: var(--border2);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .exit-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--green2), var(--green));
-      box-shadow: var(--glow-green);
-      border-radius: 2px;
-      transition: width 1.8s linear;
-    }
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="SegMind25 — Linux enthusiast, content creator and developer. Explore an interactive terminal portfolio.">
+<meta name="theme-color" content="#080c09"><title>segmind@portfolio: ~</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Rajdhani:wght@400;600;700&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&display=swap">
+<style>
+@layer reset, themes, layout, components, effects, responsive;
+@layer reset {
+*{box-sizing:border-box}
+body,h1,h2,h3,p,pre{margin:0}
+button,input,select{font:inherit}
+button,a,select{-webkit-tap-highlight-color:transparent}
+button,select{cursor:pointer}
+button{color:inherit}
+a{color:var(--accent);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+button:disabled{cursor:default;opacity:.45}
+[hidden]{display:none!important}
+::selection{background:var(--accent);color:var(--bg)}
+}
+@layer themes {
+:root{color-scheme:dark;--bg:#080c09;--pane:#0b100def;--panel:#111a14;--accent:#00ff41;--second:#b7f7c7;--text:#e0ede3;--muted:#91a697;--line:#263c2c;--glow:#00ff4116;--font:'JetBrains Mono',monospace;--scan:.12}
+[data-theme=matrix]{--font:'Courier New',monospace;--scan:.19}
+[data-theme=cyberpunk]{--bg:#0d0d1a;--pane:#101023ee;--panel:#19182f;--accent:#ff2079;--second:#00ffff;--text:#eee8ff;--muted:#b2a6c7;--line:#463053;--glow:#ff207921;--font:'Rajdhani',sans-serif;--scan:.08}
+[data-theme=vaporwave]{--bg:#1a0533;--pane:#200b38ee;--panel:#311349;--accent:#ff71ce;--second:#05ffa1;--text:#f9e9ff;--muted:#cfabd9;--line:#643575;--glow:#b967ff22;--scan:.08}
+[data-theme=monochrome]{color-scheme:light;--bg:#f5f5f5;--pane:#fffffff2;--panel:#ededed;--accent:#111;--second:#444;--text:#111;--muted:#626262;--line:#d4d4d4;--glow:#00000007;--font:'iA Writer Quattro','JetBrains Mono',monospace;--scan:0}
+[data-theme=solarized]{--bg:#002b36;--pane:#002b36f2;--panel:#073642;--accent:#b58900;--second:#2aa198;--text:#93a1a1;--muted:#839496;--line:#586e75;--glow:#268bd218;--scan:.05}
+html[lang=ja]{--font:'Noto Sans JP',monospace}
+html[lang=zh]{--font:'Noto Sans SC',monospace}
+html[lang=ar]{--font:'Noto Sans Arabic',monospace}
+}
+@layer layout {
+body{min-height:100svh;background:var(--bg);color:var(--text);font:13px/1.7 var(--font);padding:34px 28px 22px;overflow-x:hidden;transition:background .3s,color .3s}
+#particles,#rain,#confetti,.ambient,.scanlines,#flash{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#particles{z-index:-2;opacity:.6}
+.ambient{z-index:-1;background:radial-gradient(ellipse at 50% 0,var(--glow),transparent 65%)}
+.page-top,.page-foot{max-width:860px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.page-top{margin-bottom:23px;font-size:10px;letter-spacing:2px;text-transform:uppercase}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text)}
+.brand-icon{background:var(--accent);color:var(--bg);padding:0 6px;font-weight:800;font-size:15px}
+.online{color:var(--muted);display:flex;align-items:center;gap:9px}
+.dot{width:6px;height:6px;display:inline-block;background:var(--accent);box-shadow:0 0 9px var(--glow);border-radius:50%}
+.terminal{container-type:inline-size;max-width:860px;margin:auto;height:min(790px,calc(100dvh - 136px));min-height:490px;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;background:var(--pane);box-shadow:0 30px 100px #0004,inset 0 1px 0 #ffffff06;backdrop-filter:blur(20px);overflow:hidden;position:relative;animation:borderPulse 7s infinite}
+.titlebar{height:49px;flex-shrink:0;display:flex;align-items:center;gap:20px;border-bottom:1px solid var(--line);padding:0 18px;background:var(--panel)}
+.traffic{display:flex;gap:8px;direction:ltr}
+.traffic button{height:12px;width:12px;border:0;border-radius:50%;padding:0;background:#ff6057}
+.traffic button:nth-child(2){background:#febc2e}
+.traffic button:nth-child(3){background:#28c840}
+.traffic button:before{content:'';position:absolute;inset:-6px}
+.traffic button{position:relative}
+#barTitle{font-size:11px;color:var(--muted);direction:ltr;flex:1}
+.bar-actions{display:flex;align-items:center;gap:12px}
+.icon-btn{border:0;background:transparent;font-size:13px;padding:5px;min-height:32px}
+select{border:0;background:transparent;color:var(--muted);max-width:85px;font-size:10px;padding:6px}
+select option{background:var(--bg);color:var(--text)}
+.toolbar{display:flex;gap:24px;padding:0 25px;border-bottom:1px solid var(--line);flex-shrink:0;overflow:auto;scrollbar-width:none}
+.toolbar button{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:12px 0;font-size:11px;white-space:nowrap}
+.toolbar button:hover,.toolbar button.active{color:var(--accent);border-bottom-color:var(--accent)}
+.toolbar span{font-size:9px;opacity:.55;margin-inline-end:5px}
+#viewport{overflow:auto;overscroll-behavior:contain;flex:1;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding:28px 30px 20px}
+#output{min-height:100%}
+.entry{margin-bottom:25px}
+.echo{direction:ltr;text-align:left;overflow-wrap:anywhere;color:var(--muted);font-size:11px;margin:0 0 12px}
+.echo b{color:var(--accent);font-weight:400}
+.echo .command{color:var(--text)}
+.response{white-space:pre-wrap;overflow-wrap:anywhere}
+.response.rich{white-space:normal}
+.entry.past{opacity:.6;transition:opacity .3s}
+.entry:hover{opacity:1}
+.input-wrap{border-top:1px solid var(--line);padding:17px 24px;background:var(--panel);position:relative;flex-shrink:0}
+.input-row{display:flex;align-items:center;gap:10px;direction:ltr}
+.prompt{color:var(--accent);white-space:nowrap;font-size:12px}
+.prompt em{color:var(--muted);font-style:normal}
+.input-box{position:relative;flex:1;min-width:0;display:flex;align-items:center}
+#command{width:100%;border:0;outline:0;background:transparent;color:var(--text);padding:0;font-size:14px;caret-color:var(--accent);line-height:24px}
+#command::placeholder{color:var(--muted);opacity:.6}
+.block-cursor{width:8px;height:16px;background:var(--accent);position:absolute;left:0;pointer-events:none;animation:blink 1.1s steps(1) infinite}
+#command:not(:placeholder-shown)+.block-cursor{display:none}
+.input-box:focus-within .block-cursor{opacity:.8}
+#command:placeholder-shown{padding-left:13px}
+.send{background:none;border:0;color:var(--muted);font-size:18px;padding:0 6px}
+.statusbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 20px;border-top:1px solid var(--line);font-size:9px;letter-spacing:.7px;color:var(--muted);flex-shrink:0}
+.statusbar .dot{width:4px;height:4px;margin-inline-end:5px}
+.statusbar span:last-child{direction:ltr}
+.page-foot{font-size:9px;color:var(--muted);margin-top:18px;letter-spacing:1px}
+.page-foot a{text-decoration:none;color:var(--muted)}
+}
+@layer components {
+.kicker{font-size:10px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:24px}
+.hero{display:grid;grid-template-columns:1fr 175px;gap:12px;align-items:center;padding-bottom:24px}
+.hero h1{font:800 clamp(34px,7cqw,64px)/1.05 'JetBrains Mono',monospace;letter-spacing:-5px;color:var(--text);margin-bottom:12px}
+.hero h1 .outline{color:transparent;-webkit-text-stroke:1px var(--accent)}
+.hero-sub{font-size:12px;color:var(--second);margin-bottom:12px;max-width:470px}
+.hero p{max-width:450px;color:var(--muted);font-size:12px;line-height:1.9}
+.orb{width:100%;height:170px;overflow:visible;color:var(--accent);filter:drop-shadow(0 0 16px var(--glow))}
+.orb .orbit{transform-origin:center;animation:orbit 25s linear infinite}
+.orb text{font:9px monospace;fill:var(--muted)}
+.divider{height:1px;background:var(--line);margin:5px 0 22px}
+.section-label{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:13px}
+.quick-grid,.project-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.quick-card,.project{border:1px solid var(--line);background:linear-gradient(145deg,var(--panel),transparent);border-radius:4px;padding:17px;text-align:start;transition:border-color .2s,background .2s;position:relative}
+.quick-card:hover,.project:hover{border-color:var(--accent);background:var(--glow)}
+.quick-card .card-num{color:var(--muted);font-size:9px;display:block;margin-bottom:20px}
+.quick-card strong{color:var(--text);font-size:12px;font-weight:500;display:block}
+.quick-card .arrow{position:absolute;top:13px;inset-inline-end:15px;color:var(--accent)}
+.quick-card small{font-size:10px;color:var(--muted);display:block;margin-top:7px}
+.hint{font-size:10px;color:var(--muted);margin-top:24px}
+.hint code{color:var(--accent);background:var(--glow);padding:3px 5px;border:1px solid var(--line)}
+.text-accent{color:var(--accent)}
+.text-muted{color:var(--muted)}
+.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 22px}
+.help-item{display:flex;flex-direction:column;border-bottom:1px solid var(--line);padding:8px 0}
+.help-item button{border:0;background:none;color:var(--accent);padding:0;text-align:start;align-self:start}
+.help-item small{color:var(--muted);font-size:10px}
+.output-title{font-size:18px;font-weight:500;margin-bottom:15px;color:var(--text)}
+.ascii{font:11px/1.25 monospace;direction:ltr;text-align:left;color:var(--accent);overflow:auto}
+.about-layout{display:grid;grid-template-columns:140px 1fr;gap:24px}
+.bio{color:var(--muted);line-height:1.9}
+.bio strong{color:var(--text)}
+.skill{padding:10px 0;border-bottom:1px solid var(--line)}
+.skill-head{display:flex;justify-content:space-between;font-size:11px;gap:10px}
+.skill-chars{font:16px/1.8 monospace;letter-spacing:2px;color:var(--accent);display:block;overflow:hidden;white-space:nowrap}
+.skill small{color:var(--muted)}
+.project{padding:0;overflow:hidden;color:var(--text);transform-style:preserve-3d;cursor:pointer}
+.project-art{height:115px;display:flex;align-items:center;justify-content:center;color:var(--accent);background:repeating-linear-gradient(0deg,transparent 0 16px,var(--glow) 17px),repeating-linear-gradient(90deg,transparent 0 16px,var(--glow) 17px);font:35px monospace;border-bottom:1px solid var(--line);position:relative}
+.project-art canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.project-art span{z-index:1}
+.project-copy{padding:15px}
+.project h3{font-size:12px;margin-bottom:7px}
+.project p{font-size:10px;color:var(--muted)}
+.project small{font-size:8px;letter-spacing:1px;color:var(--accent);display:block;margin-top:17px}
+.contact-list{display:grid;gap:9px}
+.contact-list a{display:flex;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--line);text-decoration:none;font-size:11px}
+.contact-list a:hover{background:var(--glow)}
+.contact-list span{color:var(--muted)}
+.palette{display:flex;gap:5px;margin-top:12px}
+.palette i{width:24px;height:12px}
+.suggestions{position:absolute;bottom:100%;left:15px;right:15px;border:1px solid var(--line);background:var(--panel);padding:10px;display:flex;gap:8px;flex-wrap:wrap}
+.suggestions button{background:var(--bg);border:1px solid var(--line);padding:5px 10px}
+.floating{position:absolute;bottom:115px;right:20px;z-index:4;background:var(--panel);border:1px solid var(--line);border-radius:4px;color:var(--accent);padding:7px 12px;font-size:10px}
+#skipTyping{bottom:150px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+dialog{background:var(--pane);color:var(--text);border:1px solid var(--accent);border-radius:8px;padding:35px;width:min(760px,92vw);max-height:90dvh;box-shadow:0 0 90px var(--glow);transition:opacity .25s,transform .25s,display .25s allow-discrete;overflow:auto}
+dialog::backdrop{background:#000b;backdrop-filter:blur(8px)}
+dialog[open]{opacity:1;transform:perspective(1000px) rotateY(0)}
+@starting-style{dialog[open]{opacity:0;transform:perspective(1000px) rotateY(-15deg)}
+}
+.modal-close{float:right;background:none;border:1px solid var(--line);padding:6px 11px}
+.modal-art{height:220px;display:grid;place-items:center;color:var(--accent);font:80px monospace;background:var(--glow);margin:25px 0}
+.modal-desc{margin:16px 0 24px;color:var(--muted)}
+.fold{position:absolute;right:0;top:0;width:90px;height:90px;fill:var(--accent);opacity:.2}
+.game{border:1px solid var(--line);padding:18px;background:var(--panel);outline:none}
+.game pre{font:clamp(9px,2.8cqw,15px)/1.35 monospace;letter-spacing:2px;color:var(--accent);direction:ltr;text-align:center;white-space:pre}
+.game-top{display:flex;justify-content:space-between;margin-bottom:15px;font-size:11px}
+.game-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:15px}
+.game button{border:1px solid var(--line);background:var(--bg);padding:8px 12px;min-height:44px;min-width:44px}
+.game p{font-size:10px;color:var(--muted);margin-top:10px}
+.boot{position:fixed;inset:0;background:#050806;color:#00ff41;z-index:20;display:flex;align-items:center;justify-content:center;font:12px/1.8 monospace;padding:30px}
+.boot-inner{width:min(560px,100%)}
+.boot pre{white-space:pre-wrap}
+.boot button{position:absolute;bottom:30px;right:30px;border:1px solid #264830;background:transparent;color:#a2b7a7;padding:10px 15px}
+.boot-logo{font-size:clamp(22px,5vw,44px);font-weight:bold;letter-spacing:3px;margin:20px 0}
+.boot-cursor{animation:blink 1s steps(1) infinite}
+.boot-progress{height:2px;background:#183421;margin-top:25px}
+.boot-progress i{height:100%;display:block;background:#00ff41;width:0;transition:width .4s}
+}
+@layer effects {
+.scanlines{z-index:8;opacity:var(--scan);background:repeating-linear-gradient(transparent 0 3px,#000 3px 4px)}
+html.houdini .scanlines{background:paint(scanlines)}
+#rain{z-index:7}
+#confetti{z-index:12}
+#flash{z-index:10;opacity:0;background:var(--accent);mix-blend-mode:screen}
+.glitch{animation:tear .4s steps(2)}
+.shake{animation:shake .25s}
+.typing .block-cursor{animation:none}
+.vapor-grid{display:none;position:fixed;bottom:-40vh;left:-50%;width:200%;height:80vh;transform:perspective(450px) rotateX(60deg);background:linear-gradient(transparent 96%,#b967ff66 97%),linear-gradient(90deg,transparent 96%,#b967ff66 97%);background-size:70px 70px;z-index:-1;pointer-events:none}
+[data-theme=vaporwave] .vapor-grid{display:block}
+[data-theme=cyberpunk] .hero h1{text-shadow:3px 0 #ff207966,-3px 0 #00ffff33}
+.effects-off .scanlines{display:none}
+.effects-off *{animation:none!important;scroll-behavior:auto!important}
+@keyframes blink{50%{opacity:0}
+}
+@keyframes orbit{to{transform:rotate(360deg)}
+}
+@keyframes borderPulse{50%{box-shadow:0 20px 90px #0004,0 0 25px var(--glow)}
+}
+@keyframes tear{0%,100%{transform:none;filter:none}
+20%{transform:translateX(-3px);clip-path:inset(10% 0 0);filter:drop-shadow(3px 0 #ff2079)}
+45%{transform:translateX(3px);clip-path:inset(0 0 15%);filter:drop-shadow(-3px 0 #00ffff)}
+70%{transform:translateX(-2px);clip-path:inset(2% 0 0)}
+}
+@keyframes shake{25%,75%{transform:translateX(-4px)}
+50%{transform:translateX(4px)}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+.scanlines{display:none}
+}
+}
+@layer responsive {
+@container(max-width:600px){.hero{grid-template-columns:1fr 120px}
+.hero h1{letter-spacing:-3px}
+.orb{height:130px}
+.quick-grid{gap:8px}
+.quick-card{padding:12px}
+.quick-card small{font-size:9px}
+.project-grid{grid-template-columns:1fr}
+.project{display:grid;grid-template-columns:110px 1fr}
+.project-art{height:100%;border-bottom:0;border-inline-end:1px solid var(--line)}
+.about-layout{grid-template-columns:1fr}
+.about-layout .ascii{font-size:10px}
+.help-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){body{padding:0}
+.page-top,.page-foot{display:none}
+.terminal{height:100dvh;min-height:0;border-radius:0;border:0}
+.titlebar{padding:env(safe-area-inset-top) 15px 0;height:calc(50px + env(safe-area-inset-top));gap:13px}
+.bar-actions{gap:5px}
+#barTitle{font-size:9px}
+.toolbar{padding:0 18px;gap:24px}
+.toolbar button{min-height:44px}
+#viewport{padding:23px 19px}
+.input-wrap{padding:15px}
+.input-row{gap:7px}
+.prompt{font-size:10px}
+#command{font-size:16px}
+.statusbar{padding-bottom:calc(8px + env(safe-area-inset-bottom));font-size:8px}
+.statusbar .keyboard-hint{display:none}
+.hero{grid-template-columns:1fr}
+.hero h1{font-size:42px}
+.hero .orb{display:none}
+.hero p{font-size:11px}
+.kicker{font-size:9px;margin-bottom:20px}
+.quick-card .card-num{margin-bottom:16px}
+.quick-card strong{font-size:11px}
+.quick-card small{font-size:9px}
+.contact-list a{flex-direction:column}
+.contact-list span{overflow-wrap:anywhere}
+.icon-btn{min-width:32px;min-height:40px}
+.hint{line-height:2}
+.floating{bottom:115px}
+dialog{padding:22px}
+.boot{padding:22px}
+}
+@media(max-width:360px){.prompt em{display:none}
+.quick-grid{grid-template-columns:1fr}
+.quick-card .card-num{display:none}
+.quick-card{padding:10px 15px}
+.quick-card small{margin-top:3px}
+#barTitle{max-width:110px;overflow:hidden;text-overflow:ellipsis}
+.toolbar{gap:18px}
+}
+}
+</style>
 </head>
 <body>
-
-<div class="term">
-
-  <!-- ── Title Bar ── -->
-  <div class="term-bar">
-    <div class="dots">
-      <div class="dot r"></div>
-      <div class="dot y"></div>
-      <div class="dot g"></div>
-    </div>
-    <div class="bar-center">
-      <span class="bar-icon">⬡</span>
-      <span id="barTitle">segmind@portfolio: ~</span>
-    </div>
-    <div class="bar-right">
-      <span class="bar-badge">bash 5.1</span>
-      <span class="bar-badge">v3.0</span>
-    </div>
-  </div>
-
-  <!-- ── Body ── -->
-  <div class="term-body" id="body">
-    <div id="out"></div>
-    <div class="input-row">
-      <span class="ps1">
-        <span class="u">segmind</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="d" id="ps1Path">~</span><span class="s"> $</span>
-      </span>
-      <input id="in" type="text" autofocus autocomplete="off" spellcheck="false" aria-label="Terminal input" />
-      <span class="cursor-block"></span>
-    </div>
-  </div>
-
-  <!-- ── Footer ── -->
-  <div class="term-foot">
-    <div class="foot-seg">
-      <span class="foot-dot"></span>
-      <span>UTF-8 · bash 5.1</span>
-    </div>
-    <span>© 2026 SegMind25 · MIT</span>
-    <span id="clock"></span>
-  </div>
-
-</div>
-
-<!-- ── Exit Overlay ── -->
-<div class="exit-overlay" id="exitOverlay">
-  <div class="exit-icon">⏻</div>
-  <div class="exit-text">Logging out of segmind@portfolio</div>
-  <div class="exit-bar-wrap"><div class="exit-bar-fill" id="exitBar"></div></div>
-  <div class="exit-sub" id="exitSub">Closing session…</div>
-</div>
-
-<script>
-/* ════════════════════════════════════════════════
-   VIRTUAL FILE SYSTEM
-════════════════════════════════════════════════ */
-const FS = {
+<canvas id="particles" aria-hidden="true"></canvas><div class="ambient" aria-hidden="true"></div><div class="vapor-grid" aria-hidden="true"></div><div class="scanlines" aria-hidden="true"></div><canvas id="rain" hidden aria-hidden="true"></canvas><canvas id="confetti" hidden aria-hidden="true"></canvas><div id="flash" aria-hidden="true"></div>
+<header class="page-top"><div class="brand"><span class="brand-icon">&gt;_</span><span>SEGMIND25 / <span data-i="personal">PERSONAL SYSTEM</span></span></div><span class="online"><i class="dot"></i><span data-i="online">SYSTEM ONLINE</span></span></header>
+<main class="terminal" id="terminal" aria-label="SegMind25 portfolio terminal">
+<div class="titlebar"><div class="traffic"><button id="exitButton" aria-label="Restart terminal"></button><button id="effectsButton" aria-label="Toggle visual effects" aria-pressed="true"></button><button id="focusButton" aria-label="Focus terminal input"></button></div><span id="barTitle">segmind@portfolio: ~</span><div class="bar-actions"><select id="language" aria-label="Language"><option value="en">EN</option><option value="fr">FR</option><option value="ar">العربية</option><option value="ja">日本語</option><option value="zh">中文</option><option value="es">ES</option><option value="de">DE</option><option value="pt">PT</option></select><button class="icon-btn" id="themeButton" aria-label="Change theme">◐</button><button class="icon-btn" id="audioButton" aria-label="Enable audio" aria-pressed="false">🔇</button></div></div>
+<nav class="toolbar" aria-label="Portfolio commands"><button data-command="about"><span>01</span>about</button><button data-command="projects"><span>02</span>projects</button><button data-command="skills"><span>03</span>skills</button><button data-command="contact"><span>04</span>contact</button><button data-command="help"><span>?</span>help</button></nav>
+<section id="viewport" aria-label="Terminal history" tabindex="0"><div id="output"></div></section>
+<button id="newOutput" class="floating" hidden data-i="newOutput">↓ New output</button><button id="skipTyping" class="floating" hidden data-i="skip">Skip animation</button>
+<form id="form" class="input-wrap" autocomplete="off"><div id="suggestions" class="suggestions" hidden aria-label="Completions"></div><div class="input-row"><label class="prompt" for="command">segmind<em>@portfolio</em> <span id="cwd">~</span> ❯</label><div class="input-box"><input id="command" aria-label="Terminal command" placeholder="type a command…" spellcheck="false" autocapitalize="off" autocorrect="off"><span class="block-cursor" aria-hidden="true"></span></div><button type="submit" class="send" aria-label="Run command">↵</button></div></form>
+<footer class="statusbar"><span><i class="dot"></i><span data-i="ready">READY</span> <span id="themeLabel">/ MATRIX</span></span><span class="keyboard-hint">TAB <span data-i="complete">complete</span> · ↑↓ <span data-i="history">history</span> · CTRL+C <span data-i="cancel">cancel</span></span><span id="clock"></span></footer>
+</main>
+<footer class="page-foot"><span>© <span id="year"></span> SEGMIND25 · MIT</span><span data-i="built">BUILT WITH CURIOSITY. POWERED BY COFFEE.</span><a href="https://github.com/SegMind25" target="_blank" rel="noopener noreferrer">GITHUB ↗</a></footer>
+<div id="announce" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+<dialog id="modal" aria-labelledby="modalTitle"><button class="modal-close" id="closeModal" data-i="close">Close ×</button><svg class="fold" aria-hidden="true" viewBox="0 0 100 100"><path id="foldPath" d="M0 0 L100 0 L100 100 Z"/></svg><div id="modalContent"></div></dialog>
+<div id="boot" class="boot"><div class="boot-inner"><span class="boot-cursor">█</span><pre id="bootText"></pre><div class="boot-logo" id="bootLogo"></div><div class="boot-progress"><i id="bootProgress"></i></div></div><button id="skipBoot" data-i="skipBoot">Skip boot ↵</button></div>
+<noscript><p>This terminal requires JavaScript. Find SegMind25 on <a href="https://github.com/SegMind25">GitHub</a>.</p></noscript>
+<script type="module">
+// CONFIGURATION · Existing portfolio identity and virtual files are retained.
+const $ = (s) => document.querySelector(s), $$ = (s) => [...document.querySelectorAll(s)]; const links = {
+  gaming: 'https://www.youtube.com/@SegMind25',
+  coding: 'https://www.youtube.com/@SegError',
+  tiktok: 'https://www.tiktok.com/@segmind25',
+  discord: 'https://discord.gg/WeUYH3x9Cr',
+  github: 'https://github.com/SegMind25',
+}; const owner = { name: 'SegMind25', email: '', resume: '' }; // Add a real email/resume URL here when available.
+const themes = ['matrix', 'cyberpunk', 'vaporwave', 'monochrome', 'solarized']; const SEED = {
   '/home/segmind': {
-    type: 'd',
-    children: {
+    type: 'd', children: {
       'README.md': {
         type: 'f',
-        content: `# SegMind25\nLinux enthusiast, content creator, developer.\n\nQuick Links:\n  gaming   →  youtube.com/@SegMind25\n  coding   →  youtube.com/@SegError\n  tiktok   →  tiktok.com/@segmind25\n  discord  →  discord.gg/WeUYH3x9Cr\n  github   →  github.com/SegMind25\n\nType 'help' for all commands.`
-      },
-      'about.txt': {
+        content: `# SegMind25\nLinux enthusiast, content creator, developer.\n\nQuick Links:\n  gaming   →  youtube.com/@SegMind25\n  coding   →  youtube.com/@SegError\n  tiktok   →  tiktok.com/@segmind25\n  discord  →  discord.gg/WeUYH3x9Cr\n  github   →  github.com/SegMind25\n\nType 'help' for all commands.`,
+      }, 'about.txt': {
         type: 'f',
-        content: `SegMind25 — Linux Enthusiast & Content Architect\n\nI create content around gaming, coding, and technology.\nMy goal is to help others learn and grow in the digital space.\n\nStatus:   Always Learning\nLocation: The Internet`
-      },
-      'skills.txt': {
+        content: `SegMind25 — Linux Enthusiast & Content Architect\n\nI create content around gaming, coding, and technology.\nMy goal is to help others learn and grow in the digital space.\n\nStatus:   Always Learning\nLocation: The Internet`,
+      }, 'skills.txt': {
         type: 'f',
-        content: `Development   Linux · HTML/CSS/JS · Git\nContent       YouTube · TikTok · OBS Studio\nCommunity     Discord Management · Streaming\nOther         Problem Solving · Video Editing`
-      },
-      'contact.txt': {
+        content: `Development   Linux · HTML/CSS/JS · Git\nContent       YouTube · TikTok · OBS Studio\nCommunity     Discord Management · Streaming\nOther         Problem Solving · Video Editing`,
+      }, 'contact.txt': {
         type: 'f',
-        content: `Gaming   youtube.com/@SegMind25\nCoding   youtube.com/@SegError\nTikTok   tiktok.com/@segmind25\nDiscord  discord.gg/WeUYH3x9Cr\nGitHub   github.com/SegMind25`
-      },
-      'gaming.link':  { type:'link', url:'https://www.youtube.com/@SegMind25',     content:'🎮 YouTube Gaming — youtube.com/@SegMind25' },
-      'coding.link':  { type:'link', url:'https://www.youtube.com/@SegError',      content:'💻 YouTube Coding — youtube.com/@SegError' },
-      'tiktok.link':  { type:'link', url:'https://www.tiktok.com/@segmind25',      content:'📱 TikTok — tiktok.com/@segmind25' },
-      'discord.link': { type:'link', url:'https://discord.gg/WeUYH3x9Cr',          content:'💬 Discord — discord.gg/WeUYH3x9Cr' },
-      'github.link':  { type:'link', url:'https://github.com/SegMind25',            content:'🐙 GitHub — github.com/SegMind25' },
-      'projects': {
-        type: 'd',
-        children: {
+        content: `Gaming   youtube.com/@SegMind25\nCoding   youtube.com/@SegError\nTikTok   tiktok.com/@segmind25\nDiscord  discord.gg/WeUYH3x9Cr\nGitHub   github.com/SegMind25`,
+      }, 'gaming.link': { type: 'link', url: 'https://www.youtube.com/@SegMind25', content: '🎮 YouTube Gaming — youtube.com/@SegMind25' },
+      'coding.link': { type: 'link', url: 'https://www.youtube.com/@SegError', content: '💻 YouTube Coding — youtube.com/@SegError' },
+      'tiktok.link': { type: 'link', url: 'https://www.tiktok.com/@segmind25', content: '📱 TikTok — tiktok.com/@segmind25' },
+      'discord.link': { type: 'link', url: 'https://discord.gg/WeUYH3x9Cr', content: '💬 Discord — discord.gg/WeUYH3x9Cr' },
+      'github.link': { type: 'link', url: 'https://github.com/SegMind25', content: '🐙 GitHub — github.com/SegMind25' },
+      projects: {
+        type: 'd', children: {
           'README.md': {
             type: 'f',
-            content: `Projects — github.com/SegMind25\n\n• Terminal Portfolio   This interactive terminal\n• Tutorial Series      Educational content\n• Community Tools      Discord bots & utilities`
-          }
-        }
-      }
-    }
-  }
-};
-
-/* ════════════════════════════════════════════════
-   STATE
-════════════════════════════════════════════════ */
-let cwd    = '/home/segmind';
-let hist   = [];
-let histIdx = -1;
-let tabMatches = [], tabIdx = -1, tabBase = '', tabMenuEl = null;
-
-/* ════════════════════════════════════════════════
-   DOM REFS
-════════════════════════════════════════════════ */
-const $out   = document.getElementById('out');
-const $in    = document.getElementById('in');
-const $body  = document.getElementById('body');
-const $path  = document.getElementById('ps1Path');
-const $bar   = document.getElementById('barTitle');
-const $clock = document.getElementById('clock');
-
-/* ════════════════════════════════════════════════
-   HELPERS
-════════════════════════════════════════════════ */
-const esc = s => {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-};
-
-const fmtPath = p =>
-  p === '/home/segmind' ? '~'
-  : p.startsWith('/home/segmind/') ? '~/' + p.slice(14)
-  : p;
-
-const resolve = p => {
-  if (!p || p === '~') return '/home/segmind';
-  if (p.startsWith('~/')) p = '/home/segmind/' + p.slice(2);
-  if (!p.startsWith('/')) p = cwd === '/' ? '/' + p : cwd + '/' + p;
-  const parts = [];
-  for (const s of p.split('/')) {
-    if (s === '..') parts.pop();
-    else if (s && s !== '.') parts.push(s);
-  }
-  return '/' + parts.join('/');
-};
-
-const getNode = path => {
-  for (const root of Object.keys(FS)) {
-    if (path === root) return FS[root];
-    if (path.startsWith(root + '/')) {
-      let node = FS[root];
-      for (const seg of path.slice(root.length + 1).split('/')) {
-        if (!node.children || !node.children[seg]) return null;
-        node = node.children[seg];
-      }
-      return node;
-    }
-  }
-  return null;
-};
-
-const print = html => {
-  const div = document.createElement('div');
-  div.className = 'line';
-  div.innerHTML = html;
-  $out.appendChild(div);
-};
-
-const printRaw = html => {
-  // No animation for welcome block
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  $out.appendChild(div);
-};
-
-const prompt$ = () =>
-  `<span class="ps1"><span class="u">segmind</span><span class="at">@</span><span class="h">portfolio</span><span class="c">:</span><span class="d">${esc(fmtPath(cwd))}</span><span class="s"> $</span></span>`;
-
-const printPrompt = cmd => {
-  print(`${prompt$()} <span class="c-tx">${esc(cmd)}</span>`);
-};
-
-const scroll = () => { $body.scrollTop = $body.scrollHeight; };
-
-const updatePath = () => {
-  const fp = fmtPath(cwd);
-  $path.textContent = fp;
-  $bar.textContent  = `segmind@portfolio: ${fp}`;
-};
-
-/* ════════════════════════════════════════════════
-   LINKS
-════════════════════════════════════════════════ */
-const LINKS = {
-  gaming:   'https://www.youtube.com/@SegMind25',
-  coding:   'https://www.youtube.com/@SegError',
-  tiktok:   'https://www.tiktok.com/@segmind25',
-  discord:  'https://discord.gg/WeUYH3x9Cr',
-  github:   'https://github.com/SegMind25',
-  projects: 'https://github.com/SegMind25',
-};
-
-/* ════════════════════════════════════════════════
-   COMMANDS
-════════════════════════════════════════════════ */
-const CMD = {
-
-  /* ── help ── */
-  help: () => `<div class="out">
-<div class="help-title">── Navigation ──────────────────────</div>
-<div class="help-row"><span class="help-cmd">ls [-la] [path]</span><span class="help-desc">list directory contents</span></div>
-<div class="help-row"><span class="help-cmd">cd [path]</span><span class="help-desc">change directory  ( ~  ..  /path )</span></div>
-<div class="help-row"><span class="help-cmd">pwd</span><span class="help-desc">print working directory</span></div>
-<div class="help-row"><span class="help-cmd">tree</span><span class="help-desc">display directory tree</span></div>
-
-<div class="help-title" style="margin-top:8px">── File Operations ─────────────────</div>
-<div class="help-row"><span class="help-cmd">cat &lt;file&gt;</span><span class="help-desc">display file contents</span></div>
-<div class="help-row"><span class="help-cmd">touch &lt;name&gt;</span><span class="help-desc">create empty file</span></div>
-<div class="help-row"><span class="help-cmd">mkdir &lt;name&gt;</span><span class="help-desc">create directory</span></div>
-<div class="help-row"><span class="help-cmd">rm &lt;name&gt;</span><span class="help-desc">remove file or directory</span></div>
-
-<div class="help-title" style="margin-top:8px">── Utilities ───────────────────────</div>
-<div class="help-row"><span class="help-cmd">echo &lt;text&gt;</span><span class="help-desc">print text to output</span></div>
-<div class="help-row"><span class="help-cmd">whoami</span><span class="help-desc">current user info</span></div>
-<div class="help-row"><span class="help-cmd">date</span><span class="help-desc">current date and time</span></div>
-<div class="help-row"><span class="help-cmd">history</span><span class="help-desc">show command history</span></div>
-<div class="help-row"><span class="help-cmd">neofetch</span><span class="help-desc">system / portfolio info</span></div>
-<div class="help-row"><span class="help-cmd">clear</span><span class="help-desc">clear the terminal</span></div>
-<div class="help-row"><span class="help-cmd">exit</span><span class="help-desc">close this tab (logout alias works too)</span></div>
-
-<div class="help-title" style="margin-top:8px">── Portfolio ───────────────────────</div>
-<div class="help-row"><span class="help-cmd">about</span><span class="help-desc">who is SegMind25?</span></div>
-<div class="help-row"><span class="help-cmd">skills</span><span class="help-desc">technical skill set</span></div>
-<div class="help-row"><span class="help-cmd">contact</span><span class="help-desc">social links (clickable)</span></div>
-
-<div class="help-title" style="margin-top:8px">── Quick Links ─────────────────────</div>
-<div style="display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:2px">
-  <span class="c-y">gaming</span><span class="c-y">coding</span><span class="c-y">tiktok</span><span class="c-y">discord</span><span class="c-y">github</span>
-</div>
-
-<div style="margin-top:10px;color:var(--dim2);font-size:11.5px">
-  <span class="c-dim">Tab</span> autocomplete  ·  <span class="c-dim">↑↓</span> history  ·  <span class="c-dim">Ctrl+L</span> clear  ·  <span class="c-dim">Ctrl+C</span> cancel
-</div></div>`,
-
-  /* ── ls ── */
-  ls: (args) => {
-    const flags  = args.filter(a => a.startsWith('-')).join('');
-    const target = args.find(a => !a.startsWith('-'));
-    const path   = resolve(target || '.');
-    const node   = getNode(path);
-    if (!node)              return `<span class="c-r">ls: cannot access '${esc(target)}': No such file or directory</span>`;
-    if (node.type !== 'd') return `<span class="c-r">ls: '${esc(target)}': Not a directory</span>`;
-
-    const showAll  = flags.includes('a');
-    const showLong = flags.includes('l');
-    const names    = Object.keys(node.children || {});
-    let items      = showAll ? ['.', '..', ...names] : names;
-    if (!items.length) return '';
-
-    const cls = ch =>
-      ch.type === 'd'    ? 'dir' :
-      ch.type === 'link' ? 'sym' : 'c-tx';
-
-    if (showLong) {
-      const rows = items.map(n => {
-        const ch   = (n === '.' || n === '..') ? node : node.children[n];
-        const isD  = ch.type === 'd';
-        const isL  = ch.type === 'link';
-        const perm = isD ? 'drwxr-xr-x' : isL ? 'lrwxrwxrwx' : '-rw-r--r--';
-        const sz   = isD ? '  4096' : String(ch.content?.length || 0).padStart(6);
-        const suffix = isD ? '/' : isL ? ` -> <span class="c-b">${esc(ch.url)}</span>` : '';
-        return `<span class="c-dim">${perm}  segmind ${sz}  </span><span class="${cls(ch)}">${esc(n)}${suffix}</span>`;
-      });
-      return `<div class="out">${rows.join('\n')}</div>`;
-    }
-
-    const cols = items.map(n => {
-      const ch = (n === '.' || n === '..') ? node : node.children[n];
-      const s  = ch.type === 'd' ? '/' : ch.type === 'link' ? '@' : '';
-      return `<span class="${cls(ch)}">${esc(n)}${s}</span>`;
-    });
-    return `<div class="out" style="display:flex;flex-wrap:wrap;gap:2px 18px">${cols.join('')}</div>`;
+            content: `Projects — github.com/SegMind25\n\n• Terminal Portfolio   This interactive terminal\n• Tutorial Series      Educational content\n• Community Tools      Discord bots & utilities`,
+          }, }, }, }, }, };
+// I18N · Complete interface and portfolio response dictionaries.
+const i18n = {
+  en: {
+    "personal": "PERSONAL SYSTEM", "online": "SYSTEM ONLINE", "ready": "READY", "complete": "complete",
+    "history": "history", "cancel": "cancel", "built": "BUILT WITH CURIOSITY. POWERED BY COFFEE.", "newOutput": "↓ New output",
+    "skip": "Skip animation", "skipBoot": "Skip boot ↵", "close": "Close ×", "placeholder": "type a command…",
+    "welcome": "WELCOME TO MY CORNER OF THE INTERNET", "role": "Linux enthusiast. Content creator. Developer.", "intro": "I turn curiosity into code, content, and community. A little terminal. A whole world to explore.", "explore": "EXPLORE THE SYSTEM",
+    "selected": "SELECT A DIRECTORY", "aboutCard": "The human behind the terminal", "projectsCard": "Things I've been building", "contactCard": "Let's start a conversation",
+    "hint": "Try a command. Make yourself at home.", "aboutTitle": "A little about me", "bio": "I create gaming and coding content on YouTube, share short-form clips on TikTok, and build open-source tools on GitHub. My goal is to help others learn and grow in the digital space.", "learning": "Always learning",
+    "location": "The Internet", "skillsTitle": "My toolkit", "development": "Development", "content": "Content",
+    "community": "Community", "tools": "Tools", "skillNote": "Bars represent skill categories, not measured proficiency.", "projectsTitle": "Selected projects",
+    "p0": "Terminal Portfolio", "p1": "Tutorial Series", "p2": "Community Tools", "d0": "This interactive terminal. A browser-based playground for code, curiosity, and discovery.",
+    "d1": "Educational content about gaming, coding, and technology.", "d2": "Discord bots and utilities for community building.", "view": "Explore project", "contactTitle": "Let's connect",
+    "emailMissing": "Email has not been configured. Reach me through the links below.", "resumeMissing": "A downloadable resume has not been provided. Here is my portfolio profile.", "unknown": "Command not found. Try help.", "missing": "Path not found",
+    "notDir": "Not a directory", "isDir": "Is a directory", "exists": "Already exists", "usage": "Usage",
+    "created": "Created", "removed": "Removed", "protected": "The virtual root is protected.", "notEmpty": "Directory is not empty. Use rm -r path.",
+    "themeSet": "Theme updated", "languageSet": "Language updated", "available": "Available", "cancelled": "Cancelled",
+    "closed": "Connection closed. Reconnecting…", "hackStart": "SIMULATION ONLY / Decoding the creative matrix…", "hackEnd": "ACCESS GRANTED. The secret is simple: stay curious, keep building.", "hire": "Request received. Let's make something great — choose a contact link.",
+    "score": "Score", "pause": "Pause / Resume", "restart": "Restart", "gameHelp": "Arrows or WASD to move · Space to pause · Escape to leave",
+    "gameOver": "Game over", "paused": "Paused", "audioUnavailable": "Audio unavailable. Try again with a network connection.", "file": "file",
+    "directory": "directory", "empty": "Empty", "boot1": "Memory check… OK", "boot2": "Graphics check… ADAPTIVE",
+    "boot3": "Loading creative modules… OK", "boot4": "Mounting /home/segmind… OK", "boot5": "Welcome, visitor.", "system": "System",
+    "shell": "Shell", "host": "Host", "year": "Year", "sound": "Toggle sound",
+    "effects": "Toggle visual effects", "input": "Terminal command", "run": "Run command", "language": "Language",
+    "theme": "Change theme", "reset": "Filesystem restored.", "confirmReset": "Run resetfs confirm to restore the virtual filesystem."
   },
-
-  /* ── cd ── */
-  cd: (args) => {
-    const target = resolve(args[0] || '~');
-    const node   = getNode(target);
-    if (!node)              return `<span class="c-r">cd: '${esc(args[0] || '')}': No such file or directory</span>`;
-    if (node.type !== 'd') return `<span class="c-r">cd: '${esc(args[0])}': Not a directory</span>`;
-    cwd = target;
-    updatePath();
-    return '';
+  fr: {
+    "personal": "SYSTÈME PERSONNEL", "online": "SYSTÈME EN LIGNE", "ready": "PRÊT", "complete": "compléter",
+    "history": "historique", "cancel": "annuler", "built": "CRÉÉ PAR CURIOSITÉ. ALIMENTÉ AU CAFÉ.", "newOutput": "↓ Nouvelle sortie",
+    "skip": "Passer l'animation", "skipBoot": "Passer le démarrage ↵", "close": "Fermer ×", "placeholder": "saisissez une commande…",
+    "welcome": "BIENVENUE DANS MON COIN D'INTERNET", "role": "Passionné de Linux. Créateur de contenu. Développeur.", "intro": "Je transforme la curiosité en code, contenu et communauté. Un petit terminal, tout un monde à explorer.", "explore": "EXPLORER LE SYSTÈME",
+    "selected": "CHOISIR UN DOSSIER", "aboutCard": "La personne derrière le terminal", "projectsCard": "Ce que je construis", "contactCard": "Entamons une conversation",
+    "hint": "Essayez une commande. Faites comme chez vous.", "aboutTitle": "Quelques mots sur moi", "bio": "Je crée du contenu sur le jeu et le code sur YouTube, partage des vidéos courtes sur TikTok et développe des outils open source sur GitHub. Mon but est d'aider chacun à apprendre et à progresser.", "learning": "Toujours en apprentissage",
+    "location": "Internet", "skillsTitle": "Ma boîte à outils", "development": "Développement", "content": "Contenu",
+    "community": "Communauté", "tools": "Outils", "skillNote": "Les barres représentent des catégories, pas un niveau mesuré.", "projectsTitle": "Projets sélectionnés",
+    "p0": "Portfolio Terminal", "p1": "Série de tutoriels", "p2": "Outils communautaires", "d0": "Ce terminal interactif : un espace web pour le code, la curiosité et la découverte.",
+    "d1": "Du contenu éducatif sur le jeu, le code et la technologie.", "d2": "Des bots Discord et des utilitaires pour la communauté.", "view": "Explorer le projet", "contactTitle": "Restons en contact",
+    "emailMissing": "Aucune adresse e-mail configurée. Utilisez les liens ci-dessous.", "resumeMissing": "Aucun CV téléchargeable fourni. Voici mon profil.", "unknown": "Commande inconnue. Essayez help.", "missing": "Chemin introuvable",
+    "notDir": "Ce n'est pas un dossier", "isDir": "C'est un dossier", "exists": "Existe déjà", "usage": "Utilisation",
+    "created": "Créé", "removed": "Supprimé", "protected": "La racine virtuelle est protégée.", "notEmpty": "Dossier non vide. Utilisez rm -r chemin.",
+    "themeSet": "Thème modifié", "languageSet": "Langue modifiée", "available": "Disponibles", "cancelled": "Annulé",
+    "closed": "Connexion fermée. Reconnexion…", "hackStart": "SIMULATION / Décodage de la matrice créative…", "hackEnd": "ACCÈS AUTORISÉ. Le secret : rester curieux et continuer à créer.", "hire": "Demande reçue. Créons quelque chose ensemble — choisissez un lien.",
+    "score": "Score", "pause": "Pause / Reprendre", "restart": "Recommencer", "gameHelp": "Flèches ou WASD · Espace : pause · Échap : quitter",
+    "gameOver": "Partie terminée", "paused": "En pause", "audioUnavailable": "Audio indisponible. Réessayez avec une connexion réseau.", "file": "fichier",
+    "directory": "dossier", "empty": "Vide", "boot1": "Vérification mémoire… OK", "boot2": "Vérification graphique… ADAPTATIVE",
+    "boot3": "Chargement des modules créatifs… OK", "boot4": "Montage de /home/segmind… OK", "boot5": "Bienvenue, visiteur.", "system": "Système",
+    "shell": "Shell", "host": "Hôte", "year": "Année", "sound": "Activer le son",
+    "effects": "Activer les effets visuels", "input": "Commande du terminal", "run": "Exécuter", "language": "Langue",
+    "theme": "Changer de thème", "reset": "Système de fichiers restauré.", "confirmReset": "Exécutez resetfs confirm pour restaurer les fichiers virtuels."
   },
-
-  /* ── pwd ── */
-  pwd: () => `<div class="out">${esc(cwd)}</div>`,
-
-  /* ── cat ── */
-  cat: (args) => {
-    if (!args.length) return `<span class="c-r">cat: missing file operand</span>`;
-    const path = resolve(args[0]);
-    const node = getNode(path);
-    if (!node)             return `<span class="c-r">cat: '${esc(args[0])}': No such file or directory</span>`;
-    if (node.type === 'd') return `<span class="c-r">cat: '${esc(args[0])}': Is a directory</span>`;
-    if (node.type === 'link') {
-      window.open(node.url, '_blank');
-      return `<span class="c-g">→ Opening <span class="c-b">${esc(node.url)}</span></span>`;
-    }
-    return `<div class="out">${esc(node.content || '')}</div>`;
+  ar: {
+    "personal": "النظام الشخصي", "online": "النظام متصل", "ready": "جاهز", "complete": "إكمال",
+    "history": "السجل", "cancel": "إلغاء", "built": "صُنع بالفضول. يعمل بالقهوة.", "newOutput": "↓ مخرجات جديدة",
+    "skip": "تخطي الحركة", "skipBoot": "تخطي الإقلاع ↵", "close": "إغلاق ×", "placeholder": "اكتب أمرًا…",
+    "welcome": "مرحبًا بك في ركني من الإنترنت", "role": "شغوف بلينكس. صانع محتوى. مطوّر.", "intro": "أحوّل الفضول إلى برمجة ومحتوى ومجتمع. طرفية صغيرة وعالم كامل للاستكشاف.", "explore": "استكشف النظام",
+    "selected": "اختر مجلدًا", "aboutCard": "الشخص خلف الطرفية", "projectsCard": "أشياء أعمل على بنائها", "contactCard": "لنبدأ محادثة",
+    "hint": "جرّب أمرًا. أنت في بيتك.", "aboutTitle": "نبذة عني", "bio": "أصنع محتوى للألعاب والبرمجة على YouTube، وأشارك مقاطع قصيرة على TikTok، وأبني أدوات مفتوحة المصدر على GitHub. هدفي مساعدة الآخرين على التعلم والنمو في العالم الرقمي.", "learning": "أتعلّم دائمًا",
+    "location": "الإنترنت", "skillsTitle": "أدواتي", "development": "التطوير", "content": "المحتوى",
+    "community": "المجتمع", "tools": "الأدوات", "skillNote": "تمثل الأشرطة فئات المهارات وليست قياسًا للإتقان.", "projectsTitle": "مشاريع مختارة",
+    "p0": "طرفية الأعمال", "p1": "سلسلة الدروس", "p2": "أدوات المجتمع", "d0": "هذه الطرفية التفاعلية: مساحة في المتصفح للبرمجة والفضول والاكتشاف.",
+    "d1": "محتوى تعليمي عن الألعاب والبرمجة والتقنية.", "d2": "بوتات Discord وأدوات لبناء المجتمعات.", "view": "استكشف المشروع", "contactTitle": "لنتواصل",
+    "emailMissing": "لم يُضف بريد إلكتروني. تواصل عبر الروابط أدناه.", "resumeMissing": "لم تُضف سيرة ذاتية للتنزيل. إليك ملفي التعريفي.", "unknown": "الأمر غير موجود. جرّب help.", "missing": "المسار غير موجود",
+    "notDir": "ليس مجلدًا", "isDir": "هذا مجلد", "exists": "موجود بالفعل", "usage": "الاستخدام",
+    "created": "تم الإنشاء", "removed": "تم الحذف", "protected": "الجذر الافتراضي محمي.", "notEmpty": "المجلد غير فارغ. استخدم rm -r مع المسار.",
+    "themeSet": "تم تغيير السمة", "languageSet": "تم تغيير اللغة", "available": "المتاح", "cancelled": "أُلغي",
+    "closed": "أُغلق الاتصال. جارٍ الاتصال مجددًا…", "hackStart": "محاكاة فقط / فك مصفوفة الإبداع…", "hackEnd": "تم منح الوصول. السر بسيط: ابقَ فضوليًا واستمر في البناء.", "hire": "وصل الطلب. لنصنع شيئًا رائعًا — اختر رابط تواصل.",
+    "score": "النقاط", "pause": "إيقاف / متابعة", "restart": "إعادة اللعب", "gameHelp": "الأسهم أو WASD للحركة · المسافة للإيقاف · Escape للخروج",
+    "gameOver": "انتهت اللعبة", "paused": "متوقفة", "audioUnavailable": "الصوت غير متاح. حاول مجددًا مع اتصال بالشبكة.", "file": "ملف",
+    "directory": "مجلد", "empty": "فارغ", "boot1": "فحص الذاكرة… جاهز", "boot2": "فحص الرسومات… تكيفي",
+    "boot3": "تحميل وحدات الإبداع… جاهز", "boot4": "تجهيز /home/segmind… جاهز", "boot5": "مرحبًا أيها الزائر.", "system": "النظام",
+    "shell": "الصدفة", "host": "المضيف", "year": "السنة", "sound": "تبديل الصوت",
+    "effects": "تبديل المؤثرات", "input": "أمر الطرفية", "run": "تنفيذ الأمر", "language": "اللغة",
+    "theme": "تغيير السمة", "reset": "تمت استعادة الملفات.", "confirmReset": "نفّذ resetfs confirm لاستعادة الملفات الافتراضية."
   },
-
-  /* ── tree ── */
-  tree: () => {
-    const node = getNode(cwd);
-    let r = '<div class="out">.\n';
-    const walk = (n, prefix) => {
-      const entries = Object.entries(n.children || {});
-      entries.forEach(([name, child], i) => {
-        const last      = i === entries.length - 1;
-        const connector = last ? '└── ' : '├── ';
-        const cls       = child.type === 'd' ? 'dir' : child.type === 'link' ? 'sym' : 'c-tx';
-        const suffix    = child.type === 'd' ? '/' : child.type === 'link' ? '@' : '';
-        r += `${esc(prefix)}${connector}<span class="${cls}">${esc(name)}${suffix}</span>\n`;
-        if (child.type === 'd') walk(child, prefix + (last ? '    ' : '│   '));
-      });
-    };
-    walk(node, '');
-    // count
-    const files = Object.values(node.children || {}).filter(c => c.type === 'f' || c.type === 'link').length;
-    const dirs  = Object.values(node.children || {}).filter(c => c.type === 'd').length;
-    r += `\n<span class="c-dim">${dirs} director${dirs===1?'y':'ies'}, ${files} file${files===1?'':'s'}</span>`;
-    return r + '</div>';
+  ja: {
+    "personal": "パーソナルシステム", "online": "システム稼働中", "ready": "準備完了", "complete": "補完",
+    "history": "履歴", "cancel": "中止", "built": "好奇心で制作。コーヒーで駆動。", "newOutput": "↓ 新しい出力",
+    "skip": "アニメーションをスキップ", "skipBoot": "起動をスキップ ↵", "close": "閉じる ×", "placeholder": "コマンドを入力…",
+    "welcome": "私のインターネットの片隅へようこそ", "role": "Linux愛好家。コンテンツ制作者。開発者。", "intro": "好奇心をコード、コンテンツ、コミュニティへ。小さなターミナルから、大きな世界を探検しよう。", "explore": "システムを探索",
+    "selected": "ディレクトリを選択", "aboutCard": "ターミナルの向こうの人", "projectsCard": "制作しているもの", "contactCard": "会話を始めよう",
+    "hint": "コマンドを試して、自由に探索してください。", "aboutTitle": "自己紹介", "bio": "YouTubeでゲームやプログラミングのコンテンツを制作し、TikTokで短い動画を共有し、GitHubでオープンソースのツールを開発しています。デジタルの世界で人々の学びと成長を支えることが目標です。", "learning": "いつも学習中",
+    "location": "インターネット", "skillsTitle": "ツールキット", "development": "開発", "content": "コンテンツ",
+    "community": "コミュニティ", "tools": "ツール", "skillNote": "バーはスキルの分類を表し、習熟度の測定値ではありません。", "projectsTitle": "プロジェクト",
+    "p0": "ターミナルポートフォリオ", "p1": "チュートリアルシリーズ", "p2": "コミュニティツール", "d0": "コードと好奇心、発見のためのブラウザ上のインタラクティブなターミナル。",
+    "d1": "ゲーム、プログラミング、技術に関する教育コンテンツ。", "d2": "コミュニティを支えるDiscordボットとユーティリティ。", "view": "プロジェクトを見る", "contactTitle": "つながろう",
+    "emailMissing": "メールアドレスは未設定です。以下のリンクをご利用ください。", "resumeMissing": "ダウンロード可能な履歴書は未登録です。プロフィールをご覧ください。", "unknown": "コマンドが見つかりません。help をお試しください。", "missing": "パスが見つかりません",
+    "notDir": "ディレクトリではありません", "isDir": "ディレクトリです", "exists": "すでに存在します", "usage": "使い方",
+    "created": "作成しました", "removed": "削除しました", "protected": "仮想ルートは保護されています。", "notEmpty": "空ではありません。rm -r パスを使用してください。",
+    "themeSet": "テーマを変更しました", "languageSet": "言語を変更しました", "available": "利用可能", "cancelled": "中止しました",
+    "closed": "接続を終了。再接続中…", "hackStart": "シミュレーション / 創造のマトリックスを解析中…", "hackEnd": "アクセス許可。秘訣は、好奇心を持ち、作り続けること。", "hire": "受け付けました。一緒に何か作りましょう。連絡先を選んでください。",
+    "score": "スコア", "pause": "一時停止 / 再開", "restart": "再スタート", "gameHelp": "矢印またはWASDで移動 · スペースで一時停止 · Escapeで終了",
+    "gameOver": "ゲームオーバー", "paused": "一時停止中", "audioUnavailable": "音声を利用できません。ネットワーク接続後に再試行してください。", "file": "ファイル",
+    "directory": "ディレクトリ", "empty": "空です", "boot1": "メモリ確認… OK", "boot2": "グラフィック確認… 自動調整",
+    "boot3": "クリエイティブモジュール読込… OK", "boot4": "/home/segmind をマウント… OK", "boot5": "ようこそ、訪問者さん。", "system": "システム",
+    "shell": "シェル", "host": "ホスト", "year": "年", "sound": "音声の切り替え",
+    "effects": "視覚効果の切り替え", "input": "ターミナルコマンド", "run": "コマンドを実行", "language": "言語",
+    "theme": "テーマを変更", "reset": "ファイルシステムを復元しました。", "confirmReset": "resetfs confirm で仮想ファイルを復元します。"
   },
-
-  /* ── touch ── */
-  touch: (args) => {
-    if (!args.length) return `<span class="c-r">touch: missing file operand</span>`;
-    const name = args[0];
-    const node = getNode(cwd);
-    if (!node || node.type !== 'd') return `<span class="c-r">touch: cannot create file here</span>`;
-    if (node.children[name]) return `<span class="c-o">'${esc(name)}' already exists — timestamp updated</span>`;
-    node.children[name] = { type:'f', content:'' };
-    return `<span class="c-g">created '${esc(name)}'</span>`;
+  zh: {
+    "personal": "个人系统", "online": "系统在线", "ready": "就绪", "complete": "补全",
+    "history": "历史", "cancel": "取消", "built": "以好奇心创造，以咖啡驱动。", "newOutput": "↓ 新输出",
+    "skip": "跳过动画", "skipBoot": "跳过启动 ↵", "close": "关闭 ×", "placeholder": "输入命令…",
+    "welcome": "欢迎来到我的互联网角落", "role": "Linux 爱好者。内容创作者。开发者。", "intro": "把好奇心变成代码、内容和社区。小小终端，探索无限世界。", "explore": "探索系统",
+    "selected": "选择目录", "aboutCard": "终端背后的我", "projectsCard": "我正在制作的东西", "contactCard": "开始交流吧",
+    "hint": "试试命令，随意探索。", "aboutTitle": "关于我", "bio": "我在 YouTube 制作游戏和编程内容，在 TikTok 分享短视频，并在 GitHub 开发开源工具。我的目标是帮助他人在数字世界中学习和成长。", "learning": "持续学习",
+    "location": "互联网", "skillsTitle": "我的工具箱", "development": "开发", "content": "内容",
+    "community": "社区", "tools": "工具", "skillNote": "条形图表示技能分类，并非熟练度评分。", "projectsTitle": "精选项目",
+    "p0": "终端作品集", "p1": "教程系列", "p2": "社区工具", "d0": "这个交互式终端：浏览器中的代码、好奇心与探索空间。",
+    "d1": "关于游戏、编程和技术的教育内容。", "d2": "用于社区建设的 Discord 机器人和实用工具。", "view": "探索项目", "contactTitle": "联系我",
+    "emailMissing": "尚未配置电子邮箱，请使用以下链接联系我。", "resumeMissing": "尚未提供可下载的简历。以下是我的个人介绍。", "unknown": "找不到命令，请尝试 help。", "missing": "找不到路径",
+    "notDir": "不是目录", "isDir": "这是目录", "exists": "已存在", "usage": "用法",
+    "created": "已创建", "removed": "已删除", "protected": "虚拟根目录受保护。", "notEmpty": "目录不为空，请使用 rm -r 路径。",
+    "themeSet": "主题已更新", "languageSet": "语言已更新", "available": "可用选项", "cancelled": "已取消",
+    "closed": "连接已关闭，正在重新连接…", "hackStart": "仅为模拟 / 正在解析创意矩阵…", "hackEnd": "访问已授权。秘诀很简单：保持好奇，持续创造。", "hire": "收到请求。一起创造精彩吧，请选择联系方式。",
+    "score": "得分", "pause": "暂停 / 继续", "restart": "重新开始", "gameHelp": "方向键或 WASD 移动 · 空格暂停 · Escape 退出",
+    "gameOver": "游戏结束", "paused": "已暂停", "audioUnavailable": "音频不可用，请联网后重试。", "file": "文件",
+    "directory": "目录", "empty": "空", "boot1": "内存检查… 正常", "boot2": "图形检查… 自适应",
+    "boot3": "加载创意模块… 正常", "boot4": "挂载 /home/segmind… 正常", "boot5": "欢迎，访客。", "system": "系统",
+    "shell": "终端环境", "host": "主机", "year": "年份", "sound": "切换声音",
+    "effects": "切换视觉效果", "input": "终端命令", "run": "执行命令", "language": "语言",
+    "theme": "切换主题", "reset": "文件系统已恢复。", "confirmReset": "运行 resetfs confirm 恢复虚拟文件系统。"
   },
-
-  /* ── mkdir ── */
-  mkdir: (args) => {
-    if (!args.length) return `<span class="c-r">mkdir: missing operand</span>`;
-    const name = args[0];
-    const node = getNode(cwd);
-    if (!node || node.type !== 'd') return `<span class="c-r">mkdir: cannot create directory here</span>`;
-    if (node.children[name]) return `<span class="c-r">mkdir: '${esc(name)}': File exists</span>`;
-    node.children[name] = { type:'d', children:{} };
-    return `<span class="c-g">created directory '${esc(name)}'</span>`;
+  es: {
+    "personal": "SISTEMA PERSONAL", "online": "SISTEMA EN LÍNEA", "ready": "LISTO", "complete": "completar",
+    "history": "historial", "cancel": "cancelar", "built": "HECHO CON CURIOSIDAD. IMPULSADO POR CAFÉ.", "newOutput": "↓ Nueva salida",
+    "skip": "Saltar animación", "skipBoot": "Saltar inicio ↵", "close": "Cerrar ×", "placeholder": "escribe un comando…",
+    "welcome": "BIENVENIDO A MI RINCÓN DE INTERNET", "role": "Entusiasta de Linux. Creador de contenido. Desarrollador.", "intro": "Transformo curiosidad en código, contenido y comunidad. Un pequeño terminal, todo un mundo por explorar.", "explore": "EXPLORAR EL SISTEMA",
+    "selected": "ELIGE UN DIRECTORIO", "aboutCard": "La persona detrás del terminal", "projectsCard": "Lo que estoy creando", "contactCard": "Iniciemos una conversación",
+    "hint": "Prueba un comando. Estás en tu casa.", "aboutTitle": "Un poco sobre mí", "bio": "Creo contenido de videojuegos y programación en YouTube, comparto vídeos cortos en TikTok y desarrollo herramientas de código abierto en GitHub. Mi objetivo es ayudar a otros a aprender y crecer en el mundo digital.", "learning": "Siempre aprendiendo",
+    "location": "Internet", "skillsTitle": "Mis herramientas", "development": "Desarrollo", "content": "Contenido",
+    "community": "Comunidad", "tools": "Herramientas", "skillNote": "Las barras representan categorías, no niveles medidos.", "projectsTitle": "Proyectos seleccionados",
+    "p0": "Portfolio Terminal", "p1": "Serie de tutoriales", "p2": "Herramientas comunitarias", "d0": "Este terminal interactivo: un espacio web para el código, la curiosidad y el descubrimiento.",
+    "d1": "Contenido educativo sobre videojuegos, programación y tecnología.", "d2": "Bots de Discord y utilidades para crear comunidad.", "view": "Explorar proyecto", "contactTitle": "Conectemos",
+    "emailMissing": "No hay correo configurado. Usa los enlaces siguientes.", "resumeMissing": "No se ha proporcionado un currículum descargable. Aquí tienes mi perfil.", "unknown": "Comando desconocido. Prueba help.", "missing": "Ruta no encontrada",
+    "notDir": "No es un directorio", "isDir": "Es un directorio", "exists": "Ya existe", "usage": "Uso",
+    "created": "Creado", "removed": "Eliminado", "protected": "La raíz virtual está protegida.", "notEmpty": "El directorio no está vacío. Usa rm -r ruta.",
+    "themeSet": "Tema actualizado", "languageSet": "Idioma actualizado", "available": "Disponibles", "cancelled": "Cancelado",
+    "closed": "Conexión cerrada. Reconectando…", "hackStart": "SIMULACIÓN / Descifrando la matriz creativa…", "hackEnd": "ACCESO CONCEDIDO. El secreto: mantener la curiosidad y seguir creando.", "hire": "Solicitud recibida. Creemos algo genial: elige un enlace de contacto.",
+    "score": "Puntos", "pause": "Pausar / Continuar", "restart": "Reiniciar", "gameHelp": "Flechas o WASD · Espacio: pausa · Escape: salir",
+    "gameOver": "Fin del juego", "paused": "En pausa", "audioUnavailable": "Audio no disponible. Inténtalo de nuevo con conexión.", "file": "archivo",
+    "directory": "directorio", "empty": "Vacío", "boot1": "Comprobando memoria… OK", "boot2": "Comprobando gráficos… ADAPTATIVO",
+    "boot3": "Cargando módulos creativos… OK", "boot4": "Montando /home/segmind… OK", "boot5": "Bienvenido, visitante.", "system": "Sistema",
+    "shell": "Shell", "host": "Servidor", "year": "Año", "sound": "Cambiar sonido",
+    "effects": "Cambiar efectos visuales", "input": "Comando del terminal", "run": "Ejecutar comando", "language": "Idioma",
+    "theme": "Cambiar tema", "reset": "Sistema de archivos restaurado.", "confirmReset": "Ejecuta resetfs confirm para restaurar los archivos virtuales."
   },
-
-  /* ── rm ── */
-  rm: (args) => {
-    if (!args.length) return `<span class="c-r">rm: missing operand</span>`;
-    const name = args[0];
-    const node = getNode(cwd);
-    if (!node || !node.children || !node.children[name])
-      return `<span class="c-r">rm: '${esc(name)}': No such file or directory</span>`;
-    delete node.children[name];
-    return `<span class="c-g">removed '${esc(name)}'</span>`;
+  de: {
+    "personal": "PERSÖNLICHES SYSTEM", "online": "SYSTEM ONLINE", "ready": "BEREIT", "complete": "ergänzen",
+    "history": "Verlauf", "cancel": "abbrechen", "built": "MIT NEUGIER GEBAUT. MIT KAFFEE BETRIEBEN.", "newOutput": "↓ Neue Ausgabe",
+    "skip": "Animation überspringen", "skipBoot": "Start überspringen ↵", "close": "Schließen ×", "placeholder": "Befehl eingeben…",
+    "welcome": "WILLKOMMEN IN MEINER ECKE DES INTERNETS", "role": "Linux-Enthusiast. Content Creator. Entwickler.", "intro": "Ich verwandle Neugier in Code, Inhalte und Gemeinschaft. Ein kleines Terminal, eine ganze Welt zum Entdecken.", "explore": "SYSTEM ERKUNDEN",
+    "selected": "VERZEICHNIS WÄHLEN", "aboutCard": "Der Mensch hinter dem Terminal", "projectsCard": "Was ich gerade entwickle", "contactCard": "Lass uns ins Gespräch kommen",
+    "hint": "Probiere einen Befehl. Fühl dich wie zu Hause.", "aboutTitle": "Über mich", "bio": "Ich erstelle Gaming- und Programmierinhalte auf YouTube, teile kurze Videos auf TikTok und entwickle Open-Source-Werkzeuge auf GitHub. Mein Ziel ist es, anderen beim Lernen und Wachsen in der digitalen Welt zu helfen.", "learning": "Immer am Lernen",
+    "location": "Das Internet", "skillsTitle": "Mein Werkzeugkasten", "development": "Entwicklung", "content": "Inhalte",
+    "community": "Community", "tools": "Werkzeuge", "skillNote": "Die Balken zeigen Kategorien, keine gemessenen Kenntnisstände.", "projectsTitle": "Ausgewählte Projekte",
+    "p0": "Terminal-Portfolio", "p1": "Tutorial-Reihe", "p2": "Community-Werkzeuge", "d0": "Dieses interaktive Terminal: ein Spielplatz im Browser für Code, Neugier und Entdeckungen.",
+    "d1": "Lerninhalte über Gaming, Programmierung und Technologie.", "d2": "Discord-Bots und Hilfsprogramme für die Community.", "view": "Projekt erkunden", "contactTitle": "Kontakt aufnehmen",
+    "emailMissing": "Keine E-Mail-Adresse hinterlegt. Nutze die folgenden Links.", "resumeMissing": "Kein Lebenslauf zum Herunterladen hinterlegt. Hier ist mein Profil.", "unknown": "Befehl nicht gefunden. Probiere help.", "missing": "Pfad nicht gefunden",
+    "notDir": "Kein Verzeichnis", "isDir": "Ist ein Verzeichnis", "exists": "Existiert bereits", "usage": "Verwendung",
+    "created": "Erstellt", "removed": "Entfernt", "protected": "Das virtuelle Stammverzeichnis ist geschützt.", "notEmpty": "Verzeichnis nicht leer. Nutze rm -r Pfad.",
+    "themeSet": "Design aktualisiert", "languageSet": "Sprache aktualisiert", "available": "Verfügbar", "cancelled": "Abgebrochen",
+    "closed": "Verbindung geschlossen. Neu verbinden…", "hackStart": "SIMULATION / Kreative Matrix wird entschlüsselt…", "hackEnd": "ZUGRIFF ERLAUBT. Das Geheimnis: neugierig bleiben und weiterbauen.", "hire": "Anfrage erhalten. Lass uns etwas Großartiges bauen — wähle einen Kontaktlink.",
+    "score": "Punkte", "pause": "Pause / Weiter", "restart": "Neustart", "gameHelp": "Pfeile oder WASD · Leertaste: Pause · Escape: Beenden",
+    "gameOver": "Spiel beendet", "paused": "Pausiert", "audioUnavailable": "Audio nicht verfügbar. Versuche es mit einer Netzwerkverbindung erneut.", "file": "Datei",
+    "directory": "Verzeichnis", "empty": "Leer", "boot1": "Speicherprüfung… OK", "boot2": "Grafikprüfung… ADAPTIV",
+    "boot3": "Kreativmodule laden… OK", "boot4": "/home/segmind einbinden… OK", "boot5": "Willkommen, Besucher.", "system": "System",
+    "shell": "Shell", "host": "Host", "year": "Jahr", "sound": "Ton umschalten",
+    "effects": "Visuelle Effekte umschalten", "input": "Terminalbefehl", "run": "Befehl ausführen", "language": "Sprache",
+    "theme": "Design ändern", "reset": "Dateisystem wiederhergestellt.", "confirmReset": "Führe resetfs confirm aus, um die virtuellen Dateien wiederherzustellen."
   },
-
-  /* ── echo ── */
-  echo: (args) => `<div class="out">${esc(args.join(' '))}</div>`,
-
-  /* ── whoami ── */
-  whoami: () => `<div class="out"><span class="c-g b">segmind</span>  <span class="c-dim">—</span>  Linux Enthusiast & Content Architect</div>`,
-
-  /* ── date ── */
-  date: () => `<div class="out"><span class="c-c">${new Date().toString()}</span></div>`,
-
-  /* ── clear ── */
-  clear: () => { $out.innerHTML = ''; return null; },
-
-  /* ── history ── */
-  history: () => {
-    if (!hist.length) return `<div class="out c-dim">(no history)</div>`;
-    return '<div class="out">' +
-      hist.map((c, i) => `<span class="c-dim">${String(i+1).padStart(4)}</span>  ${esc(c)}`).join('\n') +
-      '</div>';
+  pt: {
+    "personal": "SISTEMA PESSOAL", "online": "SISTEMA ONLINE", "ready": "PRONTO", "complete": "completar",
+    "history": "histórico", "cancel": "cancelar", "built": "FEITO COM CURIOSIDADE. MOVIDO A CAFÉ.", "newOutput": "↓ Nova saída",
+    "skip": "Pular animação", "skipBoot": "Pular inicialização ↵", "close": "Fechar ×", "placeholder": "digite um comando…",
+    "welcome": "BEM-VINDO AO MEU CANTO DA INTERNET", "role": "Entusiasta de Linux. Criador de conteúdo. Desenvolvedor.", "intro": "Transformo curiosidade em código, conteúdo e comunidade. Um pequeno terminal, um mundo inteiro para explorar.", "explore": "EXPLORAR O SISTEMA",
+    "selected": "ESCOLHA UM DIRETÓRIO", "aboutCard": "A pessoa por trás do terminal", "projectsCard": "O que estou construindo", "contactCard": "Vamos conversar",
+    "hint": "Experimente um comando. Sinta-se em casa.", "aboutTitle": "Um pouco sobre mim", "bio": "Crio conteúdo de jogos e programação no YouTube, compartilho vídeos curtos no TikTok e desenvolvo ferramentas de código aberto no GitHub. Meu objetivo é ajudar outras pessoas a aprender e crescer no mundo digital.", "learning": "Sempre aprendendo",
+    "location": "A Internet", "skillsTitle": "Minhas ferramentas", "development": "Desenvolvimento", "content": "Conteúdo",
+    "community": "Comunidade", "tools": "Ferramentas", "skillNote": "As barras representam categorias, não níveis medidos.", "projectsTitle": "Projetos selecionados",
+    "p0": "Portfólio Terminal", "p1": "Série de tutoriais", "p2": "Ferramentas da comunidade", "d0": "Este terminal interativo: um espaço no navegador para código, curiosidade e descoberta.",
+    "d1": "Conteúdo educativo sobre jogos, programação e tecnologia.", "d2": "Bots do Discord e utilitários para construir comunidades.", "view": "Explorar projeto", "contactTitle": "Vamos nos conectar",
+    "emailMissing": "Nenhum e-mail configurado. Use os links abaixo.", "resumeMissing": "Nenhum currículo para download foi fornecido. Veja meu perfil.", "unknown": "Comando não encontrado. Tente help.", "missing": "Caminho não encontrado",
+    "notDir": "Não é um diretório", "isDir": "É um diretório", "exists": "Já existe", "usage": "Uso",
+    "created": "Criado", "removed": "Removido", "protected": "A raiz virtual está protegida.", "notEmpty": "O diretório não está vazio. Use rm -r caminho.",
+    "themeSet": "Tema atualizado", "languageSet": "Idioma atualizado", "available": "Disponíveis", "cancelled": "Cancelado",
+    "closed": "Conexão encerrada. Reconectando…", "hackStart": "SIMULAÇÃO / Decodificando a matriz criativa…", "hackEnd": "ACESSO PERMITIDO. O segredo: manter a curiosidade e continuar criando.", "hire": "Pedido recebido. Vamos criar algo incrível — escolha um link de contato.",
+    "score": "Pontos", "pause": "Pausar / Continuar", "restart": "Reiniciar", "gameHelp": "Setas ou WASD · Espaço: pausa · Escape: sair",
+    "gameOver": "Fim de jogo", "paused": "Pausado", "audioUnavailable": "Áudio indisponível. Tente novamente com conexão de rede.", "file": "arquivo",
+    "directory": "diretório", "empty": "Vazio", "boot1": "Verificando memória… OK", "boot2": "Verificando gráficos… ADAPTATIVO",
+    "boot3": "Carregando módulos criativos… OK", "boot4": "Montando /home/segmind… OK", "boot5": "Bem-vindo, visitante.", "system": "Sistema",
+    "shell": "Shell", "host": "Host", "year": "Ano", "sound": "Alternar som",
+    "effects": "Alternar efeitos visuais", "input": "Comando do terminal", "run": "Executar comando", "language": "Idioma",
+    "theme": "Mudar tema", "reset": "Sistema de arquivos restaurado.", "confirmReset": "Execute resetfs confirm para restaurar os arquivos virtuais."
   },
-
-  /* ── neofetch ── */
-  neofetch: () => {
-    const logo = [
-      `<span class="c-g">  ██████╗ ███████╗ ██████╗ </span>`,
-      `<span class="c-g"> ██╔════╝ ██╔════╝██╔════╝ </span>`,
-      `<span class="c-g"> ╚█████╗  █████╗  ██║  ███╗</span>`,
-      `<span class="c-g">  ╚═══██╗ ██╔══╝  ██║   ██║</span>`,
-      `<span class="c-g"> ██████╔╝ ███████╗╚██████╔╝</span>`,
-      `<span class="c-g"> ╚═════╝  ╚══════╝ ╚═════╝ </span>`,
-    ].join('\n');
-
-    const info = [
-      ['OS',       'SegMindOS (Web Terminal)'],
-      ['Host',     'portfolio.segmind25'],
-      ['Kernel',   'Terminal v3.0'],
-      ['Shell',    'bash 5.1'],
-      ['Font',     'JetBrains Mono'],
-      ['Uptime',   'since you arrived'],
-      ['Packages', '25 commands installed'],
-      ['CPU',      'Your Browser Engine'],
-      ['Memory',   'Infinite Creativity'],
-    ].map(([k,v]) =>
-      `<div class="neo-row"><span class="neo-key">${k}</span><span class="neo-sep">→</span><span class="neo-val"> ${v}</span></div>`
-    ).join('');
-
-    const bar = `<div class="neo-bar">` +
-      `<span style="color:#ff5f57">████</span>` +
-      `<span style="color:#febc2e">████</span>` +
-      `<span style="color:#28c840">████</span>` +
-      `<span style="color:var(--blue)">████</span>` +
-      `<span style="color:var(--purple)">████</span>` +
-      `<span style="color:var(--cyan)">████</span>` +
-      `</div>`;
-
-    return `<div class="out"><div class="neo-wrap">
-      <div class="neo-logo">${logo}</div>
-      <div class="neo-info">
-        <div style="margin-bottom:4px"><span class="c-g b">segmind</span><span class="c-dim">@</span><span class="c-b b">portfolio</span></div>
-        <div class="c-dim" style="margin-bottom:6px">────────────────────────────</div>
-        ${info}
-        ${bar}
-      </div>
-    </div></div>`;
-  },
-
-  /* ── about ── */
-  about: () => `<div class="out">
-<span class="c-c b">┌─ About ────────────────────────────┐</span>
-
-  Hi, I'm <span class="c-g b">SegMind25</span>.
-  Linux enthusiast, content creator & developer.
-
-  I make <span class="c-y">gaming</span> and <span class="c-y">coding</span> content on YouTube,
-  share short-form clips on <span class="c-p">TikTok</span>,
-  and build open-source tools on <span class="c-b">GitHub</span>.
-
-  <span class="c-dim">Status</span>   → <span class="c-g">Always Learning</span>
-  <span class="c-dim">Location</span> → The Internet
-
-<span class="c-c b">└────────────────────────────────────┘</span>
-
-  Type <span class="c-y">contact</span> for links · <span class="c-y">skills</span> to see my stack
-</div>`,
-
-  /* ── skills ── */
-  skills: () => `<div class="out">
-<span class="c-c b">Skills</span>  <span class="c-dim">─────────────────────────────</span>
-
-  <span class="c-y">Development</span>   Linux · HTML · CSS · JS · Git
-  <span class="c-y">Content</span>       YouTube · TikTok · OBS Studio
-  <span class="c-y">Community</span>     Discord Management · Streaming
-  <span class="c-y">Tools</span>         Video Editing · Problem Solving
-</div>`,
-
-  /* ── contact ── */
-  contact: () => `<div class="out">
-<span class="c-c b">Contact</span>  <span class="c-dim">────────────────────────────</span>
-
-  🎮  <span class="lnk" onclick="window.open('${LINKS.gaming}','_blank')">youtube.com/@SegMind25</span>    <span class="c-dim">gaming</span>
-  💻  <span class="lnk" onclick="window.open('${LINKS.coding}','_blank')">youtube.com/@SegError</span>     <span class="c-dim">coding</span>
-  📱  <span class="lnk" onclick="window.open('${LINKS.tiktok}','_blank')">tiktok.com/@segmind25</span>
-  💬  <span class="lnk" onclick="window.open('${LINKS.discord}','_blank')">discord.gg/WeUYH3x9Cr</span>
-  🐙  <span class="lnk" onclick="window.open('${LINKS.github}','_blank')">github.com/SegMind25</span>
-
-  <span class="c-dim">Click any link to open in a new tab.</span>
-</div>`,
-
-  /* ── quick links ── */
-  gaming:   () => { window.open(LINKS.gaming,   '_blank'); return `<span class="c-g">→ Opening YouTube Gaming…</span>`; },
-  coding:   () => { window.open(LINKS.coding,   '_blank'); return `<span class="c-g">→ Opening YouTube Coding…</span>`; },
-  tiktok:   () => { window.open(LINKS.tiktok,   '_blank'); return `<span class="c-g">→ Opening TikTok…</span>`; },
-  discord:  () => { window.open(LINKS.discord,  '_blank'); return `<span class="c-g">→ Opening Discord…</span>`; },
-  github:   () => { window.open(LINKS.github,   '_blank'); return `<span class="c-g">→ Opening GitHub…</span>`; },
-  projects: () => { window.open(LINKS.projects, '_blank'); return `<span class="c-g">→ Opening GitHub Projects…</span>`; },
-
-  /* ── aliases ── */
-  socials:  () => CMD.contact(),
-  youtube:  () => `<div class="out">Which channel? <span class="c-y">gaming</span> (youtube.com/@SegMind25) or <span class="c-y">coding</span> (youtube.com/@SegError)</div>`,
-
-  /* ── exit / logout ── */
-  exit: () => {
-    setTimeout(() => {
-      const overlay = document.getElementById('exitOverlay');
-      const bar     = document.getElementById('exitBar');
-      const sub     = document.getElementById('exitSub');
-      overlay.classList.add('visible');
-      // Trigger bar fill on next frame
-      requestAnimationFrame(() => { bar.style.width = '100%'; });
-      const msgs = ['Saving session state…', 'Flushing buffers…', 'Closing session…', 'Goodbye! 👋'];
-      let i = 0;
-      const t = setInterval(() => {
-        if (i < msgs.length) { sub.textContent = msgs[i++]; }
-        else { clearInterval(t); }
-      }, 480);
-      // Try window.close after animation — works only if tab was opened by script
-      setTimeout(() => {
-        window.close();
-        // Fallback: show a final message if close was blocked
-        sub.textContent = 'Tab close blocked by browser — please close manually.';
-        sub.style.color = 'var(--yellow)';
-      }, 2200);
-    }, 80);
-    return `<span class="c-g">logout</span> <span class="c-dim">— terminating session…</span>`;
-  },
-  logout: () => CMD.exit(),
 };
-
-const ALL_CMDS = Object.keys(CMD);
-
-/* ════════════════════════════════════════════════
-   EXECUTE
-════════════════════════════════════════════════ */
-const exec = raw => {
-  const trimmed = raw.trim();
-  if (!trimmed) return;
-  hist.push(trimmed);
-  histIdx = -1;
-  printPrompt(trimmed);
-
-  const parts = trimmed.split(/\s+/);
-  const cmd   = parts[0].toLowerCase();
-  const args  = parts.slice(1);
-
-  if (CMD[cmd]) {
-    const out = CMD[cmd](args);
-    if (out != null && out !== '') print(out);
-  } else {
-    print(`<span class="c-r">bash: ${esc(cmd)}: command not found</span> <span class="c-dim">(try 'help')</span>`);
+// STATE · Observable signals and function decorators without experimental syntax.
+function signal(value) {
+  const listeners = new Set(); return {
+    get value() {
+      return value; }, set value(v) {
+      value = v; listeners.forEach((fn) => fn(v)); }, subscribe(fn) {
+      listeners.add(fn); return () => listeners.delete(fn); }, }; }
+const store = {
+  get(k, f) {
+    try {
+      return localStorage.getItem('segmind:' + k) ?? f; } catch {
+      return f; } }, set(k, v) {
+    try {
+      localStorage.setItem('segmind:' + k, v); } catch {} }, }; const motionQuery = matchMedia('(prefers-reduced-motion: reduce)'),
+  language = signal(store.get('lang', 'en')); if (!i18n[language.value]) language.value = 'en';
+let theme = store.get('theme', matchMedia('(prefers-color-scheme: light)').matches ? 'monochrome' : 'matrix'); if (!themes.includes(theme)) theme = 'matrix';
+let effects = store.get('effects', 'on') === 'on', fs = structuredClone(SEED), cwd = '/home/segmind', history = [], historyPos = 0, draft = '', epoch = 0,
+  skip = false, bootToken = 0, game = null, audioEnabled = false, particles = null; const root = '/home/segmind', output = $('#output'), input = $('#command'),
+  viewport = $('#viewport'), records = []; const t = (k) => i18n[language.value][k] ?? k,
+  esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const activeEffects = () => effects && !motionQuery.matches; const pathLabel = () => (cwd === root ? '~' : '~' + cwd.slice(root.length));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const link = (url, label) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+const heading = (key) => `<h2 class="output-title">${esc(t(key))}</h2>`;
+const titleFor = (i) => t('p' + i), descFor = (i) => t('d' + i), art = ['>_', '{ }', '◈'];
+const orbit = `<svg class="orb" viewBox="0 0 180 180" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width=".65"><circle cx="90" cy="85" r="58"/><ellipse cx="90" cy="85" rx="58" ry="22"/><ellipse cx="90" cy="85" rx="58" ry="43"/><ellipse cx="90" cy="85" rx="20" ry="58"/><ellipse cx="90" cy="85" rx="42" ry="58"/><path d="M32 85h116M90 27v116"/><g class="orbit"><ellipse cx="90" cy="85" rx="78" ry="25" transform="rotate(-35 90 85)"/><circle cx="24" cy="126" r="3" fill="currentColor"/></g><path d="M7 10h15M7 10v15M158 10h15v15M7 145v15h15M158 160h15v-15" opacity=".4"/></g><text x="90" y="178" text-anchor="middle">EXPLORING THE POSSIBLE</text></svg>`;
+function shellUpdate() {
+  document.documentElement.lang = language.value; document.documentElement.dir = language.value === 'ar' ? 'rtl' : 'ltr'; $('#language').value = language.value;
+  $$('[data-i]').forEach((el) => (el.textContent = t(el.dataset.i))); input.placeholder = t('placeholder');
+  $('#themeLabel').textContent = '/ ' + theme.toUpperCase(); $('#cwd').textContent = pathLabel(); $('#barTitle').textContent = 'segmind@portfolio: ' + pathLabel();
+  document.title = $('#barTitle').textContent;
+  const labels = { audioButton: 'sound', effectsButton: 'effects', focusButton: 'input', themeButton: 'theme', language: 'language', command: 'input', exitButton: 'restart' };
+  for (const [id, key] of Object.entries(labels)) $('#' + id).setAttribute('aria-label', t(key)); $('.send').setAttribute('aria-label', t('run'));
+  $('#effectsButton').setAttribute('aria-pressed', String(effects)); document.documentElement.classList.toggle('effects-off', !activeEffects()); tick(); }
+function tick() {
+  $('#clock').textContent = new Date().toLocaleTimeString(language.value, { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
+function setTheme(name) {
+  theme = name; document.documentElement.dataset.theme = name; store.set('theme', name); shellUpdate(); particles?.color(); if (activeEffects()) {
+    glitch(); if (window.gsap) gsap.timeline().to('#flash', { opacity: 0.12, duration: 0.12 }).to('#flash', { opacity: 0, duration: 0.18 });
+    else $('#flash').animate([{ opacity: 0.1 }, { opacity: 0 }], { duration: 300 }); } }
+function glitch() {
+  if (!activeEffects()) return; const el = $('#terminal'); el.classList.remove('glitch'); void el.offsetWidth; el.classList.add('glitch');
+  setTimeout(() => el.classList.remove('glitch'), 410); }
+function cancel() {
+  epoch++; skip = true; stopGame(); stopRain(); $('#skipTyping').hidden = true; $('#suggestions').hidden = true; return epoch; }
+function nearBottom() {
+  return viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 100; }
+function follow(wasNear) {
+  if (wasNear) {
+    viewport.scrollTop = viewport.scrollHeight; $('#newOutput').hidden = true; } else $('#newOutput').hidden = false; }
+function plain(html) {
+  const el = document.createElement('div'); el.innerHTML = html; return el.textContent; }
+// OUTPUT · Text nodes are animated without injecting command input as markup.
+async function typeInto(el, html, token, animate = true) {
+  el.innerHTML = html; const nodes = [], walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) if (walker.currentNode.textContent.trim()) nodes.push(walker.currentNode); if (!animate || !activeEffects()) {
+    return; }
+  const near = nearBottom(), content = nodes.map((n) => n.textContent); nodes.forEach((n) => (n.textContent = '')); $('#skipTyping').hidden = false; skip = false;
+  let index = 0, char = 0, last = 0; const segments = content.map((s) =>
+    typeof Intl.Segmenter === 'function' ? [...new Intl.Segmenter(language.value, { granularity: 'grapheme' }).segment(s)].map((v) => v.segment) : Array.from(s), );
+  const total = content.join('').length, chunk = total > 300 ? Math.ceil(total / 110) : 1; await new Promise((resolve) => {
+    function frame(now) {
+      if (token !== epoch || !el.isConnected) {
+        if (el.isConnected) nodes.forEach((n, i) => (n.textContent = content[i])); resolve(); return; }
+      if (skip || !activeEffects()) {
+        nodes.forEach((n, i) => (n.textContent = content[i])); resolve(); return; }
+      if (now - last > 10 + Math.random() * 70) {
+        last = now; let count = 0; while (index < nodes.length && count++ < chunk) {
+          nodes[index].textContent += segments[index][char++] ?? ''; if (char >= segments[index].length) {
+            index++; char = 0; } }
+        follow(near); }
+      if (index >= nodes.length) {
+        resolve(); return; }
+      requestAnimationFrame(frame); }
+    requestAnimationFrame(frame); }); if (token === epoch) $('#skipTyping').hidden = true; }
+function render(rec) {
+  const a = rec.args ?? []; switch (rec.type) {
+    case 'welcome':
+      return `<div class="kicker"><i class="dot"></i>${t('welcome')}</div><div class="hero"><div><h1 dir="ltr">SEGMIND<span class="outline">25</span><span class="text-accent">.</span></h1><div class="hero-sub">${t('role')}</div><p>${t('intro')}</p></div>${orbit}</div><div class="divider"></div><div class="section-label"><span>${t('explore')}</span><span dir="ltr">~/portfolio</span></div><div class="quick-grid">${['about', 'projects', 'contact'].map((c, i) => `<button class="quick-card" data-command="${c}"><span class="card-num" dir="ltr">0${i + 1} / ${c.toUpperCase()}</span><span class="arrow">↗</span><strong dir="ltr">./${c}</strong><small>${t(c + 'Card')}</small></button>`).join('')}</div><p class="hint"><code>help</code> &nbsp; ${t('hint')}</p>`;
+    case 'help':
+      return (
+        heading('explore') +
+        `<div class="help-grid">${Object.entries(commands)
+          .map(
+            ([name, c]) =>
+              `<div class="help-item"><button data-command="${esc(c.example || name)}">${esc(name)}${c.syntax ? ' ' + esc(c.syntax) : ''}</button><small>${esc(t(c.description))}</small></div>`,
+          )
+          .join('')}</div>`
+      );
+    case 'about':
+      return (
+        heading('aboutTitle') +
+        `<div class="about-layout"><pre class="ascii" aria-hidden="true">    .----------.
+   /  .------.  \\
+  |  /  _  _  \\  |
+  |  |  ▀  ▀  |  |
+  |  |   __   |  |
+   \\  '------'  /
+    '---.  .---'
+   /    |  |    \\
+  /  S E G M I N D \\
+  '---------------'</pre><div class="bio"><strong>SegMind25</strong><p>${t('role')}</p><br><p>${t('bio')}</p><br><span class="text-accent">● ${t('learning')}</span> · ${t('location')}</div></div>`
+      );
+    case 'skills':
+      return (
+        heading('skillsTitle') +
+        [
+          ['development', 'Linux · HTML · CSS · JS · Git'], ['content', 'YouTube · TikTok · OBS Studio'], ['community', 'Discord · Streaming'],
+          ['tools', 'Video Editing · Problem Solving'], ]
+          .map(
+            ([k, v]) =>
+              `<div class="skill"><div class="skill-head"><span>${t(k)}</span><span class="text-muted">${v}</span></div><span class="skill-chars" aria-hidden="true">████████████░░░░</span></div>`,
+          )
+          .join('') +
+        `<p class="hint">${t('skillNote')}</p>`
+      );
+    case 'projects':
+      return (
+        heading('projectsTitle') +
+        `<div class="project-grid">${art.map((symbol, i) => `<button class="project" data-project="${i}"><div class="project-art"><span>${symbol}</span></div><div class="project-copy"><h3>${titleFor(i)}</h3><p>${descFor(i)}</p><small>${['HTML / CSS / JS', 'GAMING / CODING', 'DISCORD / UTILITIES'][i]} ↗</small></div></button>`).join('')}</div><p class="hint">${link(links.github, 'GitHub ↗')}</p>`
+      );
+    case 'contact':
+      return (
+        heading('contactTitle') +
+        `<div class="contact-list">${Object.entries(links)
+          .map(([key, url]) => link(url, `<b>${esc(key)}</b><span dir="ltr">${esc(url.replace('https://www.', '').replace('https://', ''))} ↗</span>`))
+          .join('')}${owner.email ? link('mailto:' + owner.email, esc(owner.email)) : ''}</div>${owner.email ? '' : `<p class="hint">${t('emailMissing')}</p>`}`
+      );
+    case 'resume':
+      return `<p>${t('resumeMissing')}</p><br>` + render({ type: 'about' }) + render({ type: 'skills' });
+    case 'whoami':
+      return `<pre class="ascii">┌──────────────────────────┐\n│  SegMind25 / ${new Date().getFullYear()}         │\n└──────────────────────────┘</pre><p>${t('role')}</p>`;
+    case 'neofetch':
+      return `<div class="about-layout">${orbit}<div><h2 class="output-title">segmind@portfolio</h2>${[
+        ['system', 'Portfolio v2026 / SegMindOS'],
+        ['shell', 'zsh-creative'],
+        ['host', 'portfolio.segmind25'],
+        ['year', new Date().getFullYear()],
+        ['theme', theme],
+        ['language', language.value],
+      ]
+        .map(([k, v]) => `<div><span class="text-accent">${t(k)}</span> <span dir="ltr">${esc(v)}</span></div>`)
+        .join(
+          '',
+        )}<div class="palette" aria-hidden="true">${['#dc322f', '#b58900', '#859900', '#2aa198', '#268bd2', '#6c71c4', '#d33682'].map((c) => `<i style="background:${c}"></i>`).join('')}</div></div></div>`;
+    case 'message':
+      return `<span>${esc(t(rec.key))}${a.length ? ' ' + a.map(esc).join(' ') : ''}</span>`;
+    case 'raw':
+      return esc(rec.text);
+    case 'link':
+      return link(rec.url, esc(rec.label || rec.url) + ' ↗');
+    case 'file':
+      return fileContent(rec.path, rec.snapshot);
+    case 'listing':
+      return `<pre class="response" dir="ltr">${rec.items.map((item) => `${item.long ? esc(item.kind === 'd' ? 'drwxr-xr-x' : '-rw-r--r--') + '  segmind  ' : ''}<span class="${item.kind === 'd' ? 'text-accent' : ''}">${esc(item.name)}${item.kind === 'd' ? '/' : ''}</span>`).join('\n') || t('empty')}</pre>`;
+    case 'game':
+      return `<div class="game" tabindex="0" data-game><div class="game-top"><span>SNAKE.EXE</span><span>${t('score')}: <b data-score>0</b></span></div><pre data-board aria-label="Snake board"></pre><div class="game-actions"><button data-dir="up" aria-label="↑">↑</button><button data-dir="left" aria-label="←">←</button><button data-dir="down" aria-label="↓">↓</button><button data-dir="right" aria-label="→">→</button><button data-game-action="pause">${t('pause')}</button><button data-game-action="restart">${t('restart')}</button></div><p data-game-status>${t('gameHelp')}</p></div>`;
+    default:
+      return ''; } }
+const observed = new Set(); let visibility; try {
+  visibility = new IntersectionObserver((entries) => entries.forEach((e) => e.target.classList.toggle('past', !e.isIntersecting)), {
+    root: viewport, threshold: 0.08, trackVisibility: true, delay: 150, }); } catch {
+  visibility = new IntersectionObserver((entries) => entries.forEach((e) => e.target.classList.toggle('past', !e.isIntersecting)), { root: viewport, threshold: 0.08 });
+}
+async function append(rec, cmd = '', animate = true) {
+  const token = epoch, near = nearBottom(), entry = document.createElement('article'); entry.className = 'entry'; if (cmd) {
+    const echo = document.createElement('div'); echo.className = 'echo';
+    echo.innerHTML = `<b>➜ ${esc(pathLabel())}</b> <span class="command">${esc(cmd)}</span>`;
+    entry.append(echo); }
+  const el = document.createElement('div'); el.className = 'response rich'; entry.append(el); output.append(entry); records.push({ rec, el, entry });
+  visibility.observe(entry); observed.add(entry); while (records.length > 150) {
+    const old = records.shift(); visibility.unobserve(old.entry); observed.delete(old.entry); old.entry.remove(); }
+  await typeInto(el, render(rec), token, animate); if (token !== epoch) return; enhance(el); follow(near);
+  $('#announce').textContent = el.textContent.slice(0, 1800); return el; }
+async function translateOutput() {
+  const token = epoch, near = nearBottom(), bounds = viewport.getBoundingClientRect(), visible = []; for (const { rec, el, entry } of records) {
+    if (rec.type === 'game') continue; const rect = entry.getBoundingClientRect(); el.innerHTML = render(rec);
+    if (rect.bottom > bounds.top && rect.top < bounds.bottom) visible.push({ rec, el }); }
+  if (activeEffects()) await Promise.all(visible.map(({ rec, el }) => typeInto(el, render(rec), token, true))); if (token === epoch) {
+    visible.forEach(({ el }) => enhance(el)); follow(near); } }
+language.subscribe(() => {
+  store.set('lang', language.value); shellUpdate(); translateOutput(); if (game) {
+    game.el.querySelector('[data-game-action=pause]').textContent = t('pause'); game.el.querySelector('[data-game-action=restart]').textContent = t('restart');
+    drawGame(); } });
+// VIRTUAL FILESYSTEM · No command touches the host's disk.
+function resolvePath(path = '~') {
+  if (path === '~') return root; if (path.startsWith('~/')) path = root + path.slice(1); if (!path.startsWith('/')) path = cwd + '/' + path; const parts = [];
+  for (const bit of path.split('/')) {
+    if (!bit || bit === '.') continue; if (bit === '..') parts.pop(); else parts.push(bit); }
+  const full = '/' + parts.join('/'); return full === root || full.startsWith(root + '/') ? full : null; }
+function nodeAt(path) {
+  if (!path) return null; let node = fs[root]; for (const bit of path.slice(root.length).split('/').filter(Boolean)) {
+    if (node.type !== 'd' || !Object.hasOwn(node.children, bit)) return null; node = node.children[bit]; }
+  return node; }
+function fileContent(path, snapshot) {
+  const name = path.split('/').pop();
+  if (path === root + '/about.txt') return esc('SegMind25 — ' + t('role') + '\n\n' + t('bio') + '\n\n' + t('learning') + ' · ' + t('location'));
+  if (path === root + '/skills.txt')
+    return ['development', 'content', 'community', 'tools']
+      .map((k, i) => esc(t(k) + '   ' + ['Linux · HTML/CSS/JS · Git', 'YouTube · TikTok · OBS Studio', 'Discord Management · Streaming', 'Problem Solving · Video Editing'][i]))
+      .join('\n'); if (path === root + '/README.md')
+    return esc(
+      'SegMind25\n' +
+        t('role') +
+        '\n\n' +
+        Object.entries(links)
+          .map(([k, v]) => k + ' → ' + v)
+          .join('\n') +
+        '\n\nhelp → ' +
+        t('explore'), );
+  if (path === root + '/projects/README.md') return esc(t('projectsTitle') + ' — ' + links.github + '\n\n' + art.map((_, i) => titleFor(i) + ' — ' + descFor(i)).join('\n'));
+  return esc(snapshot || ''); }
+const msg = (key, ...args) => ({ type: 'message', key, args }), raw = (text) => ({ type: 'raw', text: String(text) }); const failure = (key, ...args) => {
+  sound('error'); input.parentElement.classList.remove('shake'); void input.offsetWidth; if (activeEffects()) input.parentElement.classList.add('shake');
+  return msg(key, ...args); };
+function tokenize(value) {
+  const matches = value.match(/(?:[^\s"'\\]|\\.|"(?:[^"\\]|\\.)*"|'[^']*')+/g) || []; let quote = null, escaped = false; for (const ch of value) {
+    if (escaped) {
+      escaped = false; continue; }
+    if (ch === '\\' && quote !== "'") {
+      escaped = true; continue; }
+    if (quote === ch) quote = null; else if (!quote && (ch === '"' || ch === "'")) quote = ch; }
+  if (quote || escaped) throw Error('usage');
+  return matches.map((word) => word.replace(/"((?:[^"\\]|\\.)*)"|'([^']*)'|\\(.)/g, (_, a, b, c) => (a !== undefined ? a.replace(/\\(.)/g, '$1') : b !== undefined ? b : c)));
+}
+function mutation(name, args) {
+  const target = args.find((s) => !s.startsWith('-')); if (!target) return msg('usage', name + ' ' + (name === 'rm' ? '[-r] ' : '') + 'path');
+  const path = resolvePath(target); if (!path || path === root) return failure('protected'); const parent = nodeAt(path.slice(0, path.lastIndexOf('/'))),
+    base = path.split('/').pop(); if (!parent || parent.type !== 'd') return failure('notDir', target); if (name === 'rm') {
+    if (!Object.hasOwn(parent.children, base)) return failure('missing', target); const n = parent.children[base];
+    if (n.type === 'd' && Object.keys(n.children).length && !args.includes('-r')) return failure('notEmpty');
+    if (cwd === path || cwd.startsWith(path + '/')) cwd = root; delete parent.children[base]; shellUpdate(); return msg('removed', target); }
+  if (Object.hasOwn(parent.children, base)) return name === 'touch' ? raw('') : failure('exists', target); Object.defineProperty(parent.children, base, {
+    value: name === 'mkdir' ? { type: 'd', children: {} } : { type: 'f', content: '' }, writable: true, enumerable: true, configurable: true, });
+  return msg('created', target); }
+// COMMAND REGISTRY · Every existing command plus the creative portfolio commands.
+const commands = {
+  help: { description: 'explore', run: () => ({ type: 'help' }) }, about: { description: 'aboutCard', run: () => ({ type: 'about' }) },
+  skills: { description: 'skillsTitle', run: () => ({ type: 'skills' }) }, projects: { description: 'projectsCard', run: () => ({ type: 'projects' }) },
+  contact: { description: 'contactCard', run: () => ({ type: 'contact' }) }, theme: {
+    description: 'theme', syntax: '[name]', run: (a) => {
+      if (!a[0]) return msg('available', themes.join(' / ')); if (!themes.includes(a[0])) return failure('available', themes.join(' / ')); setTheme(a[0]);
+      return msg('themeSet', a[0]); }, }, lang: {
+    description: 'language', syntax: '[code]', run: (a) => {
+      if (!a[0] || !i18n[a[0]]) return msg('available', Object.keys(i18n).join(' / ')); language.value = a[0]; glitch(); return msg('languageSet', a[0]); }, },
+  play: { description: 'gameHelp', run: () => ({ type: 'game' }) }, hack: {
+    description: 'hackStart', run: () => {
+      startRain(); const token = epoch; setTimeout(() => {
+        if (token === epoch && !$('#rain').hidden) stopRain(); }, 4800); return msg('hackEnd'); }, }, clear: {
+    description: 'empty', run: () => {
+      clearScreen(); glitch(); return null; }, }, exit: {
+    description: 'restart', run: () => {
+      clearScreen(); boot(true); return null; }, }, ls: {
+    description: 'directory', syntax: '[-la] [path]', run: (a) => {
+      const path = resolvePath(a.find((s) => !s.startsWith('-')) || '.'), node = nodeAt(path); if (!node) return failure('missing');
+      if (node.type !== 'd') return raw(path.split('/').pop()); const flags = a.filter((s) => s.startsWith('-')).join(''); return {
+        type: 'listing', items: Object.entries(node.children)
+          .filter(([k]) => flags.includes('a') || !k.startsWith('.'))
+          .map(([name, n]) => ({ name, kind: n.type, long: flags.includes('l') })), }; }, }, cd: {
+    description: 'directory', syntax: '[path]', run: (a) => {
+      const path = resolvePath(a[0]), node = nodeAt(path); if (!node) return failure('missing', a[0] || ''); if (node.type !== 'd') return failure('notDir');
+      cwd = path; shellUpdate(); return raw(pathLabel()); }, }, pwd: { description: 'directory', run: () => raw(cwd) }, cat: {
+    description: 'file', syntax: '[file]', example: 'cat README.md', run: (a) => {
+      if (!a[0]) return msg('usage', 'cat [file]');
+      if (a[0] === 'resume') return owner.resume ? { type: 'link', url: owner.resume, label: 'Resume.pdf' } : { type: 'resume' }; const path = resolvePath(a[0]),
+        node = nodeAt(path); if (!node) return failure('missing', a[0]); if (node.type === 'd') return failure('isDir', a[0]);
+      return node.type === 'link' ? { type: 'link', url: node.url, label: node.content } : { type: 'file', path, snapshot: node.content }; }, }, tree: {
+    description: 'directory', run: () => {
+      let rows = [pathLabel()];
+      function walk(n, p) {
+        const entries = Object.entries(n.children || {}); entries.forEach(([name, node], i) => {
+          const last = i === entries.length - 1; rows.push(p + (last ? '└── ' : '├── ') + name + (node.type === 'd' ? '/' : ''));
+          if (node.type === 'd') walk(node, p + (last ? '    ' : '│   ')); }); }
+      walk(nodeAt(cwd), ''); return raw(rows.join('\n')); }, }, touch: { description: 'created', syntax: '[file]', run: (a) => mutation('touch', a) },
+  mkdir: { description: 'created', syntax: '[directory]', run: (a) => mutation('mkdir', a) },
+  rm: { description: 'removed', syntax: '[-r] [path]', run: (a) => mutation('rm', a) },
+  echo: { description: 'content', syntax: '[text]', run: (a) => raw(a.join(' ')) },
+  history: { description: 'history', run: () => raw(history.map((h, i) => `${String(i + 1).padStart(2)}  ${h}`).join('\n')) },
+  date: { description: 'year', run: () => raw(new Date().toLocaleString(language.value)) }, whoami: { description: 'role', run: () => ({ type: 'whoami' }) },
+  neofetch: { description: 'system', run: () => ({ type: 'neofetch' }) }, sudo: {
+    description: 'hire', syntax: 'hire me', example: 'sudo hire me', run: (a) => {
+      if (a.join(' ') !== 'hire me') return msg('usage', 'sudo hire me'); confetti(); sound('success'); return msg('hire'); }, }, resetfs: {
+    description: 'reset', syntax: 'confirm', run: (a) => {
+      if (a[0] !== 'confirm') return msg('confirmReset'); fs = structuredClone(SEED); cwd = root; shellUpdate(); return msg('reset'); }, },
+  socials: { description: 'contactCard', run: () => ({ type: 'contact' }) },
+  youtube: { description: 'content', run: () => raw('gaming → ' + links.gaming + '\ncoding → ' + links.coding) }, };
+for (const [name, url] of Object.entries(links)) commands[name] = { description: 'contactCard', run: () => ({ type: 'link', url, label: name }) };
+function withFeedback(fn) {
+  return async (...args) => {
+    sound('execute'); return fn(...args); }; } // Function decorator, valid in untranspiled modules.
+const execute = withFeedback(async (value) => {
+  if (!value.trim()) return; cancel(); const token = epoch; history.push(value); history = history.slice(-50); historyPos = history.length; draft = '';
+  input.value = ''; $$('.toolbar button').forEach((b) => b.classList.toggle('active', b.dataset.command === value.trim())); let rec; try {
+    const [cmd, ...args] = tokenize(value.trim()); rec = commands[cmd.toLowerCase()] ? await commands[cmd.toLowerCase()].run(args) : failure('unknown', cmd);
+  } catch {
+    rec = msg('usage', value); }
+  if (token !== epoch || !rec) return; const el = await append(rec, value, rec.type !== 'game'); if (token !== epoch) return; if (rec.type === 'game' && el) {
+    startGame(el.querySelector('[data-game]')); particles?.scatter(); }
+  if (value === 'sudo hire me') await append({ type: 'contact' }); });
+function clearScreen() {
+  cancel(); records.splice(0); visibility.disconnect(); observed.clear(); output.replaceChildren(); $('#newOutput').hidden = true; }
+// INTERACTIONS · Progressive GSAP timelines, WAAPI micro-interactions, project modals.
+function enhance(el) {
+  if (!activeEffects()) return; const cards = el.querySelectorAll('.project,.quick-card'), bars = el.querySelectorAll('.skill-chars'); if (window.gsap) {
+    gsap.fromTo(cards, { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, stagger: 0.09, ease: 'power3.out' });
+    gsap.fromTo(bars, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.8, stagger: 0.12 }); if (window.ScrollTrigger)
+      cards.forEach((card) => {
+        const anim = gsap.fromTo(card, { opacity: 0.65 }, { opacity: 1, paused: true });
+        ScrollTrigger.create({ trigger: card, scroller: viewport, start: 'top 95%', once: true, onEnter: () => anim.play() }); }); } else {
+    cards.forEach((card, i) =>
+      card.animate(
+        [
+          { opacity: 0, transform: 'translateY(35px)' }, { opacity: 1, transform: 'translateY(0)' }, ], { duration: 500, delay: i * 75, fill: 'backwards' }, ), );
+    bars.forEach((bar, i) => bar.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: 700, delay: i * 100 })); } }
+let modalOrigin = null;
+function openProject(i, button) {
+  modalOrigin = button; $('#modalContent').innerHTML =
+    `<div class="kicker">0${i + 1} / ${t('projectsTitle')}</div><h2 id="modalTitle">${titleFor(i)}</h2><div class="modal-art">${art[i]}</div><p class="modal-desc">${descFor(i)}</p>${link(i === 1 ? links.coding : links.github, t('view') + ' ↗')}`;
+  $('#modal').showModal(); if (activeEffects()) {
+    if (window.gsap) {
+      gsap.fromTo('#modal', { rotationY: -12, opacity: 0 }, { rotationY: 0, opacity: 1, duration: 0.45 });
+      if (window.MorphSVGPlugin) gsap.fromTo('#foldPath', { attr: { d: 'M0 0 L100 0 L100 100 Z' } }, { morphSVG: 'M65 0 L100 0 L100 35 Z', duration: 0.5 }); } else
+      $('#modal').animate(
+        [
+          { opacity: 0, transform: 'perspective(900px) rotateY(-12deg)' }, { opacity: 1, transform: 'perspective(900px) rotateY(0)' }, ], { duration: 400 }, ); } }
+$('#closeModal').onclick = () => $('#modal').close(); $('#modal').addEventListener('close', () => modalOrigin?.focus());
+$('#modal').addEventListener('click', (e) => {
+  if (e.target === $('#modal')) {
+    const r = e.target.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) e.target.close(); } });
+output.addEventListener('pointermove', (e) => {
+  const card = e.target.closest('.project'); if (!card || !activeEffects() || e.pointerType === 'touch') return; const r = card.getBoundingClientRect(),
+    x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+  card.style.transform = `perspective(700px) rotateX(${-y * 9}deg) rotateY(${x * 9}deg)`;
+  hoverShader(card, x + 0.5, 1 - (y + 0.5)); }); output.addEventListener('pointerout', (e) => {
+  const card = e.target.closest('.project'); if (card && !card.contains(e.relatedTarget)) {
+    card.style.transform = ''; stopHover(); } }); document.addEventListener('click', (e) => {
+  const command = e.target.closest('[data-command]'), project = e.target.closest('[data-project]'), dir = e.target.closest('[data-dir]'),
+    action = e.target.closest('[data-game-action]'); if (command) {
+    execute(command.dataset.command); input.focus(); }
+  if (project) openProject(Number(project.dataset.project), project); if (dir && game) changeDirection(dir.dataset.dir); if (action && game) {
+    if (action.dataset.gameAction === 'restart') startGame(game.el); else {
+      game.paused = !game.paused; drawGame(); } } }); $('#form').addEventListener('submit', (e) => {
+  e.preventDefault(); execute(input.value); }); $('#newOutput').onclick = () => {
+  viewport.scrollTop = viewport.scrollHeight; $('#newOutput').hidden = true; }; $('#skipTyping').onclick = () => (skip = true); viewport.addEventListener(
+  'scroll', () => {
+    if (nearBottom()) $('#newOutput').hidden = true; }, { passive: true }, );
+$('#themeButton').onclick = () => execute('theme ' + themes[(themes.indexOf(theme) + 1) % themes.length]);
+$('#language').onchange = (e) => execute('lang ' + e.target.value); $('#exitButton').onclick = () => execute('exit');
+$('#focusButton').onclick = () => input.focus(); $('#effectsButton').onclick = () => {
+  effects = !effects; store.set('effects', effects ? 'on' : 'off'); shellUpdate(); if (!effects) {
+    stopRain(); stopHover(); }
+  particles?.refresh(); }; motionQuery.addEventListener('change', () => {
+  shellUpdate(); particles?.refresh(); }); input.addEventListener('input', () => {
+  $('#suggestions').hidden = true; input.parentElement.classList.add('typing'); clearTimeout(input.idleTimer);
+  input.idleTimer = setTimeout(() => input.parentElement.classList.remove('typing'), 500); sound('key'); });
+function completions(value) {
+  const parts = value.split(/\s+/), partial = parts.at(-1); if (parts.length === 1) return Object.keys(commands).filter((s) => s.startsWith(partial));
+  if (parts[0] === 'theme') return themes.filter((s) => s.startsWith(partial));
+  if (parts[0] === 'lang') return Object.keys(i18n).filter((s) => s.startsWith(partial)); const slash = partial.lastIndexOf('/'),
+    prefix = slash >= 0 ? partial.slice(0, slash + 1) : '', base = partial.slice(slash + 1), node = nodeAt(resolvePath(prefix || '.'));
+  return Object.entries(node?.children || {})
+    .filter(([s]) => s.startsWith(base))
+    .map(([s, n]) => prefix + s + (n.type === 'd' ? '/' : '')); }
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+    e.preventDefault(); if (historyPos === history.length) draft = input.value;
+    historyPos = Math.max(0, Math.min(history.length, historyPos + (e.key === 'ArrowUp' ? -1 : 1)));
+    input.value = historyPos === history.length ? draft : history[historyPos]; setTimeout(() => input.setSelectionRange(input.value.length, input.value.length), 0);
   }
-  scroll();
-};
-
-/* ════════════════════════════════════════════════
-   TAB COMPLETION
-════════════════════════════════════════════════ */
-const complete = val => {
-  const parts   = val.split(/\s+/);
-  const partial = parts[parts.length - 1].toLowerCase();
-  if (parts.length <= 1) return ALL_CMDS.filter(c => c.startsWith(partial));
-  const node = getNode(cwd);
-  if (!node?.children) return [];
-  return Object.keys(node.children).filter(n => n.toLowerCase().startsWith(partial));
-};
-
-const clearTabMenu = () => {
-  tabMenuEl?.remove(); tabMenuEl = null;
-  tabMatches = []; tabIdx = -1; tabBase = '';
-};
-
-const renderTabMenu = () => {
-  tabMenuEl?.remove();
-  const div = document.createElement('div');
-  div.className = 'tab-menu line';
-  tabMatches.forEach((m, i) => {
-    const span = document.createElement('span');
-    span.className = 'tab-item' + (i === tabIdx ? ' active' : '');
-    span.textContent = m;
-    div.appendChild(span);
-  });
-  $out.appendChild(div);
-  tabMenuEl = div;
-  scroll();
-};
-
-const applyTab = () => {
-  if (tabIdx < 0 || tabIdx >= tabMatches.length) return;
-  const parts = tabBase.split(/\s+/);
-  parts[parts.length - 1] = tabMatches[tabIdx];
-  $in.value = parts.join(' ');
-};
-
-/* ════════════════════════════════════════════════
-   INPUT EVENTS
-════════════════════════════════════════════════ */
-$in.addEventListener('input', () => clearTabMenu());
-
-$in.addEventListener('keydown', e => {
-  if (e.key === 'Tab') {
-    e.preventDefault();
-    const val = $in.value;
-    if (!val) return;
-
-    if (!tabMatches.length) {
-      const matches = complete(val);
-      if (!matches.length) return;
-      if (matches.length === 1) {
-        const parts = val.split(/\s+/);
-        parts[parts.length - 1] = matches[0];
-        $in.value = parts.join(' ');
-        return;
-      }
-      tabMatches = matches;
-      tabBase    = val;
-      tabIdx     = e.shiftKey ? matches.length - 1 : 0;
-    } else {
-      tabIdx = e.shiftKey
-        ? (tabIdx - 1 + tabMatches.length) % tabMatches.length
-        : (tabIdx + 1) % tabMatches.length;
-    }
-    applyTab();
-    renderTabMenu();
-    return;
-  }
-
-  if (e.key === 'Enter') {
-    clearTabMenu();
-    exec($in.value);
-    $in.value = '';
-    return;
-  }
-
-  if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    if (histIdx < hist.length - 1) {
-      histIdx++;
-      $in.value = hist[hist.length - 1 - histIdx];
-    }
-    return;
-  }
-
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    if (histIdx > 0) {
-      histIdx--;
-      $in.value = hist[hist.length - 1 - histIdx];
-    } else {
-      histIdx = -1;
-      $in.value = '';
-    }
-    return;
-  }
-
-  if (e.ctrlKey && e.key === 'l') {
-    e.preventDefault();
-    CMD.clear();
-    return;
-  }
-
-  if (e.ctrlKey && e.key === 'c') {
-    e.preventDefault();
-    printPrompt($in.value + '^C');
-    $in.value = '';
-    clearTabMenu();
-    scroll();
-    return;
-  }
-});
-
-/* ════════════════════════════════════════════════
-   FOCUS & CLOCK
-════════════════════════════════════════════════ */
-document.addEventListener('click', () => $in.focus());
-
-const tick = () => { $clock.textContent = new Date().toLocaleTimeString(); };
-tick();
-setInterval(tick, 1000);
-
-/* ════════════════════════════════════════════════
-   WELCOME BANNER
-════════════════════════════════════════════════ */
-printRaw(`<div class="line banner-art">
- ███████╗███████╗ ██████╗ ███╗   ███╗██╗███╗   ██╗██████╗ ██████╗ ███████╗
- ██╔════╝██╔════╝██╔════╝ ████╗ ████║██║████╗  ██║██╔══██╗╚════██╗██╔════╝
- ███████╗█████╗  ██║  ███╗██╔████╔██║██║██╔██╗ ██║██║  ██║ █████╔╝███████╗
- ╚════██║██╔══╝  ██║   ██║██║╚██╔╝██║██║██║╚██╗██║██║  ██║██╔═══╝ ╚════██║
- ███████║███████╗╚██████╔╝██║ ╚═╝ ██║██║██║ ╚████║██████╔╝███████╗███████║
- ╚══════╝╚══════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚══════╝</div>`);
-
-printRaw(`<div class="line banner-divider">  ─────────────────────────────────────────────────────────────────────────────</div>`);
-
-printRaw(`<div class="line banner-info">  <span class="c-dim">[</span><span class="c-g b">v3.0</span><span class="c-dim">]</span>  Interactive Terminal Portfolio  <span class="c-dim">│</span>  Last login: <span class="c-c">${new Date().toLocaleString()}</span></div>`);
-printRaw(`<div class="line banner-info">  Type <span class="c-y">help</span> to see all commands  <span class="c-dim">·</span>  Type <span class="c-y">about</span> to learn more  <span class="c-dim">·</span>  Type <span class="c-y">contact</span> for links</div>`);
-printRaw(`<div class="line" style="margin-bottom:10px"></div>`);
-
-$in.focus();
+  if (e.key === 'Tab' && !e.shiftKey) {
+    const matches = completions(input.value); if (!matches.length) return; e.preventDefault();
+    const prefix = input.value.slice(0, input.value.length - input.value.split(/\s+/).at(-1).length); if (matches.length === 1) {
+      input.value = prefix + matches[0]; return; }
+    $('#suggestions').replaceChildren(); matches.forEach((match) => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = match; b.onclick = () => {
+        input.value = prefix + match; $('#suggestions').hidden = true; input.focus(); }; $('#suggestions').append(b); }); $('#suggestions').hidden = false;
+    $('#suggestions button')?.focus(); }
+  if (e.key === 'Escape') {
+    $('#suggestions').hidden = true; skip = true; }
+  if (e.ctrlKey && e.key.toLowerCase() === 'l') {
+    e.preventDefault(); execute('clear'); }
+  if (e.ctrlKey && e.key.toLowerCase() === 'c') {
+    e.preventDefault(); cancel(); input.value = ''; append(msg('cancelled'), '^C', false); } }); document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (!$('#boot').hidden) finishBoot(); else if (game) {
+      stopGame(); input.focus(); } else {
+      $('#suggestions').hidden = true; skip = true; } }
+  if (game && !$('#modal').open && e.target !== input) {
+    const map = { ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down', ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right' }; if (map[e.key]) {
+      e.preventDefault(); changeDirection(map[e.key]); }
+    if (e.code === 'Space') {
+      e.preventDefault(); game.paused = !game.paused; drawGame(); } } });
+// BOOT · 5-second sequence, explicit skip, and reduced-motion bypass.
+async function boot(restart = false) {
+  const token = ++bootToken; $('#boot').hidden = false; $('#bootText').textContent = restart ? t('closed') : ''; $('#bootLogo').textContent = '';
+  $('#bootProgress').style.width = '0'; if (!activeEffects()) {
+    finishBoot(); return; }
+  await sleep(2000); if (token !== bootToken) return; for (let i = 1; i <= 4; i++) {
+    if (token !== bootToken) return; $('#bootText').textContent += '\n' + t('boot' + i); $('#bootProgress').style.width = i * 18 + '%'; await sleep(190); }
+  for (let i = 0; i < 3; i++) {
+    if (token !== bootToken) return; $('#boot').classList.add('glitch'); await sleep(100); $('#boot').classList.remove('glitch'); await sleep(80); }
+  const logo = 'SEGMIND25'; for (let i = 0; i <= logo.length; i++) {
+    if (token !== bootToken) return;
+    $('#bootLogo').textContent = logo.slice(0, i) + Array.from({ length: logo.length - i }, () => String.fromCharCode(33 + Math.random() * 60)).join('');
+    await sleep(55); }
+  if (token !== bootToken) return; $('#bootText').textContent += '\n' + t('boot5'); $('#bootProgress').style.width = '100%'; await sleep(550);
+  if (token === bootToken) finishBoot(); }
+function finishBoot() {
+  if ($('#boot').hidden) return; bootToken++; $('#boot').hidden = true; $('#boot').classList.remove('glitch');
+  if (!records.length) append({ type: 'welcome' }, '', false); input.focus({ preventScroll: true }); sound('boot'); }
+$('#skipBoot').onclick = finishBoot;
+// ASCII SNAKE · Local, cancellable game with keyboard and touch controls.
+function stopGame() {
+  if (!game) return; clearInterval(game.timer); game.el.querySelector('[data-game-status]').textContent = t('cancelled'); game = null; }
+function startGame(el) {
+  stopGame(); game = {
+    el, snake: [
+      [7, 6], [6, 6], [5, 6], ], dir: [1, 0], next: [1, 0], food: [13, 6], score: 0, paused: false, over: false, turn: false, }; game.timer = setInterval(() => {
+    if (!game || game.paused || game.over || document.hidden) return; game.dir = game.next; game.turn = false;
+    const head = [game.snake[0][0] + game.dir[0], game.snake[0][1] + game.dir[1]], eat = head[0] === game.food[0] && head[1] === game.food[1],
+      body = eat ? game.snake : game.snake.slice(0, -1);
+    if (head[0] < 0 || head[0] >= 22 || head[1] < 0 || head[1] >= 12 || body.some((p) => p[0] === head[0] && p[1] === head[1])) {
+      game.over = true; drawGame(); sound('error'); return; }
+    game.snake.unshift(head); if (eat) {
+      game.score++; sound('execute'); const free = [];
+      for (let y = 0; y < 12; y++) for (let x = 0; x < 22; x++) if (!game.snake.some((p) => p[0] === x && p[1] === y)) free.push([x, y]);
+      if (!free.length) game.over = true; else game.food = free[Math.floor(Math.random() * free.length)]; } else game.snake.pop(); drawGame(); }, 145); drawGame();
+  el.focus({ preventScroll: true }); }
+function changeDirection(dir) {
+  if (!game || game.turn) return; const d = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[dir];
+  if (d[0] === -game.dir[0] && d[1] === -game.dir[1]) return; game.next = d; game.turn = true; }
+function drawGame() {
+  if (!game) return; const rows = Array.from({ length: 12 }, () => Array(22).fill('·')); rows[game.food[1]][game.food[0]] = '◆';
+  game.snake.forEach(([x, y], i) => (rows[y][x] = i ? '▓' : '█'));
+  game.el.querySelector('[data-board]').textContent = '┌' + '─'.repeat(22) + '┐\n' + rows.map((r) => '│' + r.join('') + '│').join('\n') + '\n└' + '─'.repeat(22) + '┘';
+  game.el.querySelector('[data-score]').textContent = game.score;
+  game.el.querySelector('[data-game-status]').textContent = t(game.over ? 'gameOver' : game.paused ? 'paused' : 'gameHelp'); }
+// MATRIX RAIN AND CONFETTI · Canvas effects stop when hidden or cancelled.
+let rainFrame = 0, confettiFrame = 0;
+function stopRain() {
+  cancelAnimationFrame(rainFrame); $('#rain').hidden = true; }
+function startRain() {
+  if (!activeEffects()) return; const canvas = $('#rain'), ctx = canvas.getContext('2d'); canvas.width = innerWidth; canvas.height = innerHeight;
+  canvas.hidden = false; const drops = Array.from({ length: Math.ceil(innerWidth / 18) }, () => Math.random() * -50); let last = 0;
+  function frame(now) {
+    if (canvas.hidden) return; if (document.hidden) {
+      rainFrame = requestAnimationFrame(frame); return; }
+    if (now - last > 45) {
+      last = now; ctx.fillStyle = '#00000014'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#00ff41'; ctx.font = '14px monospace';
+      drops.forEach((y, i) => {
+        ctx.fillText(String.fromCharCode(0x30a0 + Math.random() * 90), i * 18, y * 18); drops[i] = y * 18 > canvas.height && Math.random() > 0.98 ? 0 : y + 1; }); }
+    rainFrame = requestAnimationFrame(frame); }
+  rainFrame = requestAnimationFrame(frame); }
+function confetti() {
+  if (!activeEffects()) return; cancelAnimationFrame(confettiFrame); const c = $('#confetti'), ctx = c.getContext('2d'); c.width = innerWidth;
+  c.height = innerHeight; c.hidden = false; const pieces = Array.from({ length: 110 }, () => ({
+      x: c.width / 2, y: c.height * 0.7, vx: (Math.random() - 0.5) * 16, vy: -5 - Math.random() * 13,
+      color: ['#00ff41', '#ff2079', '#00ffff', '#b967ff'][Math.floor(Math.random() * 4)], })), start = performance.now();
+  function frame(now) {
+    ctx.clearRect(0, 0, c.width, c.height); if (now - start > 2400) {
+      c.hidden = true; return; }
+    pieces.forEach((p) => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.22; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 4, 8); }); confettiFrame = requestAnimationFrame(frame); }
+  confettiFrame = requestAnimationFrame(frame); }
+// LIBRARIES · Lazy and optional; terminal interaction never waits for a CDN.
+const scriptLoads = new Map();
+function loadScript(src) {
+  if (scriptLoads.has(src)) return scriptLoads.get(src); const promise = new Promise((resolve, reject) => {
+    const tag = document.createElement('script'); tag.src = src; tag.async = true; const timeout = setTimeout(() => {
+      tag.remove(); scriptLoads.delete(src); reject(Error('timeout')); }, 10000); tag.onload = () => {
+      clearTimeout(timeout); resolve(); }; tag.onerror = () => {
+      clearTimeout(timeout); scriptLoads.delete(src); reject(Error('unavailable')); }; document.body.append(tag); }); scriptLoads.set(src, promise); return promise;
+}
+async function loadGSAP() {
+  try {
+    await loadScript('https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js');
+    await Promise.allSettled(
+      ['ScrollTrigger', 'TextPlugin', 'MorphSVGPlugin'].map(async (name) => {
+        await loadScript(`https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/${name}.min.js`);
+        gsap.registerPlugin(window[name]); }), ); if (window.TextPlugin) {
+      const label = $('.page-top [data-i="online"]'); if (label && activeEffects()) gsap.fromTo(label, { text: '' }, { text: t('online'), duration: 0.6 }); }
+  } catch {
+    /* WAAPI remains available. */ } }
+let synths = null, toneReady;
+function loadTone() {
+  return (toneReady ??= loadScript('https://cdn.jsdelivr.net/npm/tone@15.1.22/build/Tone.js').catch((e) => {
+    toneReady = null; throw e; })); }
+$('#audioButton').onclick = async () => {
+  if (audioEnabled) {
+    audioEnabled = false; Tone.Destination.mute = true; synths?.poly.releaseAll(); $('#audioButton').textContent = '🔇';
+    $('#audioButton').setAttribute('aria-pressed', 'false'); return; }
+  try {
+    await loadTone(); await Tone.start(); if (!synths) {
+      const filter = new Tone.Filter(600, 'lowpass').toDestination(); synths = {
+        key: new Tone.MembraneSynth({ volume: -34, envelope: { attack: 0.001, decay: 0.02, sustain: 0, release: 0.01 } }).toDestination(),
+        blip: new Tone.Synth({ volume: -29, envelope: { attack: 0.005, decay: 0.06, sustain: 0, release: 0.02 } }).toDestination(),
+        noise: new Tone.NoiseSynth({ volume: -35, envelope: { attack: 0.005, decay: 0.08, sustain: 0, release: 0.02 } }).connect(filter),
+        poly: new Tone.PolySynth(Tone.Synth, { volume: -28 }).toDestination(), }; }
+    audioEnabled = true; Tone.Destination.mute = false; $('#audioButton').textContent = '🔊'; $('#audioButton').setAttribute('aria-pressed', 'true'); sound('boot');
+  } catch {
+    append(msg('audioUnavailable'), '', false); } }; let lastSound = 0;
+function sound(kind) {
+  if (!audioEnabled || !synths || document.hidden) return; const now = Tone.now(); if (kind === 'key' && now - lastSound < 0.035) return; lastSound = now; try {
+    if (kind === 'key') synths.key.triggerAttackRelease('C2', '64n', now); else if (kind === 'execute') synths.blip.triggerAttackRelease(800, 0.08, now);
+    else if (kind === 'error') synths.noise.triggerAttackRelease(0.08, now); else if (kind === 'success') {
+      const transport = Tone.getTransport(); transport.stop(); transport.cancel(); transport.seconds = 0;
+      ['C4', 'E4', 'G4', 'C5', 'E5', 'G5'].forEach((n, i) => transport.schedule((time) => synths.poly.triggerAttackRelease(n, 0.18, time), i * 0.12));
+      transport.start();
+      if (window.gsap && activeEffects()) gsap.timeline().to('#terminal', { scale: 1.006, duration: 0.18 }).to('#terminal', { scale: 1, duration: 0.5 });
+    } else ['C4', 'E4', 'G4'].forEach((note, i) => synths.poly.triggerAttackRelease(note, 0.2, now + i * 0.12)); } catch {
+    /* Rapid toggles cannot interrupt command execution. */ } }
+// THREE.JS r168 · WebGPU renderer, built-in WebGL2 fallback, then Canvas2D.
+let three = null, threeClassic = null, hoverState = null;
+async function setupParticles() {
+  const fallback = $('#particles'), ctx = fallback.getContext('2d'); let accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+    width = innerWidth, height = innerHeight, frameId = 0, scatterUntil = 0, renderer, scene, camera, cloud, geometry, base, material, mouse = { x: 0, y: 0 };
+  const points = Array.from({ length: 100 }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() + 0.5, s: Math.random() * 0.000025 + 0.00001 }));
+  function resize() {
+    width = innerWidth; height = innerHeight; fallback.width = width; fallback.height = height; if (renderer) {
+      renderer.setSize(width, height); camera.aspect = width / height; camera.updateProjectionMatrix(); } }
+  function draw(now) {
+    if (!document.hidden && activeEffects()) {
+      if (renderer) {
+        cloud.rotation.y = now * 0.000025 + mouse.x * 0.05; cloud.rotation.x = mouse.y * 0.03;
+        const scale = now < scatterUntil ? 1 + Math.sin(((scatterUntil - now) / 1400) * Math.PI) * 1.6 : 1; cloud.scale.setScalar(scale);
+        renderer.renderAsync(scene, camera).catch(() => {
+          renderer.domElement.remove(); renderer.dispose(); renderer = null; fallback.style.opacity = '.6'; }); } else {
+        ctx.clearRect(0, 0, width, height); ctx.fillStyle = accent; for (const p of points) {
+          p.y = (p.y + p.s * 16) % 1; const scatter = now < scatterUntil ? Math.sin(((scatterUntil - now) / 1400) * Math.PI) * 130 : 0;
+          const x = p.x * width + mouse.x * 12 + (p.x - 0.5) * scatter, y = p.y * height + mouse.y * 10 + (p.y - 0.5) * scatter; ctx.globalAlpha = 0.12 + p.r * 0.12;
+          ctx.beginPath(); ctx.arc(x, y, p.r, 0, Math.PI * 2); ctx.fill(); }
+        ctx.globalAlpha = 1; } }
+    frameId = requestAnimationFrame(draw); }
+  resize(); window.addEventListener('resize', resize); window.addEventListener(
+    'pointermove', (e) => {
+      mouse.x = e.clientX / width - 0.5; mouse.y = e.clientY / height - 0.5; }, { passive: true }, ); frameId = requestAnimationFrame(draw); particles = {
+    color() {
+      accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(); material?.color.set(accent); }, scatter() {
+      scatterUntil = performance.now() + 1400; }, refresh() {
+      if (!activeEffects()) {
+        ctx.clearRect(0, 0, width, height); if (renderer) renderer.domElement.style.opacity = '0'; } else if (renderer) renderer.domElement.style.opacity = '.55'; },
+  }; try {
+    three = await import('https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.webgpu.js');
+    if (!activeEffects()) return; while (!$('#boot').hidden) await sleep(100); const candidate = new three.WebGPURenderer({ alpha: true, antialias: false });
+    candidate.setPixelRatio(Math.min(devicePixelRatio, 1.5)); await candidate.init(); candidate.setSize(width, height); candidate.domElement.id = 'threeBackground';
+    Object.assign(candidate.domElement.style, { position: 'fixed', inset: '0', width: '100%', height: '100%', pointerEvents: 'none', zIndex: '-2', opacity: '.55' });
+    document.body.prepend(candidate.domElement); fallback.style.opacity = '0'; scene = new three.Scene();
+    camera = new three.PerspectiveCamera(55, width / height, 0.1, 100); camera.position.z = 6; geometry = new three.BufferGeometry();
+    base = new Float32Array((innerWidth < 600 ? 150 : 400) * 3); for (let i = 0; i < base.length; i++) base[i] = (Math.random() - 0.5) * 16;
+    geometry.setAttribute('position', new three.BufferAttribute(base, 3));
+    material = new three.PointsMaterial({ color: accent, size: 0.018, transparent: true, opacity: 0.6 }); cloud = new three.Points(geometry, material);
+    scene.add(cloud); renderer = candidate; particles.refresh(); } catch {
+    renderer?.dispose(); renderer = null; fallback.style.opacity = '.6'; }
+  window.addEventListener(
+    'pagehide', () => {
+      cancelAnimationFrame(frameId); geometry?.dispose(); material?.dispose(); renderer?.dispose(); }, { once: true }, ); }
+// One reusable Three.js shader plane provides project hover displacement.
+async function hoverShader(card, x, y) {
+  if (hoverState?.card === card) {
+    hoverState.material.uniforms.mouse.value.set(x, y); return; }
+  if (hoverState?.loading) return; stopHover(); const loading = { loading: true, card }; hoverState = loading; try {
+    threeClassic ??= await import('https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js');
+    if (hoverState !== loading || !card.isConnected) return; const T = threeClassic, renderer = new T.WebGLRenderer({ alpha: true, antialias: false }),
+      artEl = card.querySelector('.project-art'); renderer.setSize(artEl.clientWidth, artEl.clientHeight); renderer.setPixelRatio(1);
+    artEl.append(renderer.domElement); const scene = new T.Scene(), camera = new T.OrthographicCamera(-1, 1, 1, -1, 0, 2); camera.position.z = 1;
+    const geometry = new T.PlaneGeometry(2, 2, 24, 24), material = new T.ShaderMaterial({
+        transparent: true,
+        uniforms: { time: { value: 0 }, mouse: { value: new T.Vector2(x, y) }, color: { value: new T.Color(getComputedStyle(card).getPropertyValue('--accent').trim()) } },
+        vertexShader:
+          'varying vec2 vUv; uniform vec2 mouse; uniform float time; void main(){vUv=uv; vec3 p=position; p.xy+=normalize(p.xy+0.001)*sin(length(uv-mouse)*22.-time*3.)*.035; gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}',
+        fragmentShader:
+          'varying vec2 vUv; uniform vec2 mouse; uniform vec3 color; void main(){float lines=pow(abs(sin(vUv.x*60.)*sin(vUv.y*40.)),12.); float glow=1.-smoothstep(0.,.6,length(vUv-mouse)); gl_FragColor=vec4(color,lines*.3+glow*.12);}',
+      }); scene.add(new T.Mesh(geometry, material)); const state = { card, renderer, geometry, material, id: 0 }; hoverState = state;
+    function frame(now) {
+      if (hoverState !== state) return; if (!document.hidden) {
+        material.uniforms.time.value = now * 0.001; renderer.render(scene, camera); }
+      state.id = requestAnimationFrame(frame); }
+    state.id = requestAnimationFrame(frame); } catch {
+    if (hoverState === loading) hoverState = null; } }
+function stopHover() {
+  if (!hoverState) return; cancelAnimationFrame(hoverState.id); hoverState.geometry?.dispose(); hoverState.material?.dispose(); hoverState.renderer?.dispose();
+  hoverState.renderer?.domElement.remove(); hoverState = null; }
+async function setupPaint() {
+  if (!CSS.paintWorklet) return;
+  const blob = new Blob([`registerPaint('scanlines',class{paint(ctx,size){ctx.fillStyle='rgba(0,0,0,.6)';for(let y=0;y<size.height;y+=4)ctx.fillRect(0,y,size.width,1)}})`], {
+      type: 'text/javascript', }), url = URL.createObjectURL(blob); try {
+    await CSS.paintWorklet.addModule(url); document.documentElement.classList.add('houdini'); } catch {
+    /* CSS repeating-gradient is the local-file fallback. */ } finally {
+    URL.revokeObjectURL(url); } }
+// INITIALIZATION · Top-level await only yields locally; optional imports cannot block boot.
+await Promise.resolve(); $('#year').textContent = new Date().getFullYear(); setTheme(theme); shellUpdate(); setInterval(tick, 1000); boot(); loadGSAP();
+setupParticles(); setupPaint(); const sizeObserver = new ResizeObserver(() => {
+  if (nearBottom()) viewport.scrollTop = viewport.scrollHeight; }); sizeObserver.observe($('#terminal')); let glitchTimer;
+function scheduleGlitch() {
+  glitchTimer = setTimeout(
+    () => {
+      if (activeEffects() && !document.hidden && $('#boot').hidden) {
+        const el = records[Math.floor(Math.random() * records.length)]?.el; if (el && !el.querySelector('[data-game]')) {
+          const target = el.querySelector('.kicker,.output-title'); if (target) {
+            const original = target.textContent; target.textContent = Array.from(original, (c) => (c === ' ' ? ' ' : Math.random() > 0.7 ? '░' : c)).join('');
+            setTimeout(() => {
+              if (target.isConnected) target.textContent = original; }, 180); }
+          el.animate(
+            [
+              { filter: 'none', transform: 'none' }, { filter: 'drop-shadow(2px 0 #ff2079)', transform: 'translateX(2px)' }, { filter: 'none', transform: 'none' },
+            ], { duration: 180 }, ); } }
+      scheduleGlitch(); }, 15000 + Math.random() * 15000, ); }
+scheduleGlitch(); document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    stopRain(); stopHover(); if (game) {
+      game.paused = true; drawGame(); } } }); window.addEventListener(
+  'pagehide', () => {
+    cancel(); clearTimeout(glitchTimer); sizeObserver.disconnect(); visibility.disconnect(); stopHover();
+    synths && Object.values(synths).forEach((s) => s.dispose()); }, { once: true }, );
 </script>
 </body>
 </html>
