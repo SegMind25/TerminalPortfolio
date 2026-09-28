@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1220">
 <meta name="description" content="SegMind25 — Linux enthusiast, content creator and developer. A simple terminal portfolio.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2212%22%20fill%3D%22%2317253a%22%2F%3E%3Cpath%20d%3D%22m15%2020%2013%2012-13%2012m21%200h14%22%20fill%3D%22none%22%20stroke%3D%22%237abaff%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
 <title>segmind@portfolio: ~</title>
 <style>
-/* A plain blue terminal. No libraries, animations, or decorative overlays. */
+/* A minimal blue terminal with lightweight controls and motion. */
 :root{color-scheme:dark;--bg:#0b1220;--surface:#101b2c;--bar:#17253a;--line:#2b3d55;--blue:#7abaff;--text:#d9e3f0;--muted:#93a6bf;--error:#ff9b9b}
 *{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:28px;background:var(--bg);color:var(--text);font:13px/1.8 ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace}
 .terminal{width:min(860px,100%);height:min(600px,calc(100dvh - 56px));display:flex;flex-direction:column;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--surface)}
@@ -19,16 +20,26 @@ a{color:var(--blue);text-underline-offset:3px}a:hover{color:#c0e1ff}a:focus-visi
 #suggestions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}#suggestions:empty{display:none}#suggestions button{background:var(--bar);border:1px solid var(--line);color:var(--blue);font:inherit;padding:3px 8px;cursor:pointer}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
 @media(max-width:600px){body{padding:0}.terminal{width:100%;height:100dvh;border:0;border-radius:0}.titlebar{padding:calc(12px + env(safe-area-inset-top)) 16px 12px}#screen{padding:20px 16px calc(20px + env(safe-area-inset-bottom))}#input{font-size:16px}.prompt{font-size:12px}}
+/* Small controls and restrained terminal animations. */
+.titlebar{padding-block:8px}#title{flex:1}.window-controls{display:flex;gap:4px;margin-inline-start:auto}.icon-button{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:4px;color:var(--muted);background:transparent;cursor:pointer;transition:background .15s,color .15s}.icon-button:hover{background:#243650;color:var(--blue)}.icon-button.exit:hover{color:var(--error);background:#402b37}.icon-button svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.terminal{animation:terminal-in .28s ease-out}.entry{animation:output-in .16s ease-out}.ascii-logo{font:clamp(5px,1.5vw,9px)/1.35 ui-monospace,Consolas,monospace;white-space:pre;color:var(--blue);margin:0 0 18px;direction:ltr;user-select:none}.terminal-footer{display:flex;justify-content:space-between;gap:12px;flex-shrink:0;border-top:1px solid var(--line);padding:9px 18px;color:var(--muted);font-size:10px}.session-state{display:flex;align-items:center;gap:7px}.session-dot{width:5px;height:5px;border-radius:50%;background:var(--blue)}.is-closed .session-dot{background:var(--muted)}
+#closed{padding:16px 0}#closed p{margin:0 0 14px}#reconnect{font:inherit;color:var(--blue);border:1px solid var(--line);border-radius:4px;background:transparent;padding:7px 12px;cursor:pointer}#reconnect:hover{background:var(--bar)}[hidden]{display:none!important}
+.terminal:fullscreen,.terminal.expanded{width:100%;height:100dvh;max-width:none;border-radius:0}.terminal.expanded{position:fixed;inset:0;z-index:2}
+@keyframes terminal-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}@keyframes output-in{from{opacity:.45;transform:translateY(2px)}to{opacity:1;transform:none}}
+@media(max-width:600px){.titlebar{padding-block:calc(4px + env(safe-area-inset-top)) 4px;gap:9px}.icon-button{width:44px;height:44px}.terminal-footer{padding:9px 16px calc(9px + env(safe-area-inset-bottom));font-size:9px}#screen{padding-bottom:20px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <main class="terminal" aria-label="Portfolio terminal">
-<header class="titlebar"><span class="symbol" aria-hidden="true">&gt;_</span><span id="title">segmind@portfolio: ~</span></header>
+<header class="titlebar"><span class="symbol" aria-hidden="true">&gt;_</span><span id="title">segmind@portfolio: ~</span><div class="window-controls"><button class="icon-button" id="fullscreen" type="button" aria-label="Enter fullscreen" title="Fullscreen" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4"/></svg></button><button class="icon-button exit" id="exit" type="button" aria-label="Exit terminal" title="Exit terminal"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button></div></header>
 <section id="screen" aria-label="Terminal history" tabindex="0">
 <div id="output"></div>
 <form id="form" autocomplete="off"><label class="prompt" for="input"><span>segmind</span>:<span id="path">~</span> $</label><input id="input" aria-label="Terminal command" spellcheck="false" autocapitalize="off" autocorrect="off" enterkeyhint="send"></form>
 <div id="suggestions" aria-label="Command suggestions"></div>
+<div id="closed" hidden><p class="muted">[session closed]</p><button id="reconnect" type="button">Reconnect ↵</button></div>
 </section>
+<footer class="terminal-footer"><span class="session-state"><i class="session-dot" aria-hidden="true"></i><span id="sessionStatus">Connected</span></span><span>© <span id="year">2026</span> SegMind25 · MIT</span></footer>
 </main>
 <div id="announce" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 <noscript>Please enable JavaScript or visit <a href="https://github.com/SegMind25">SegMind25 on GitHub</a>.</noscript>
@@ -89,7 +100,9 @@ function print(html,command){
  while(output.children.length>150)output.firstElementChild.remove();
  $('#announce').textContent=result.textContent;scroll();
 }
-function welcome(){print('<span class="welcome">SegMind25</span>\n<span class="muted">Linux enthusiast. Content creator. Developer.</span>\n\nType <span class="accent">help</span> to see commands.');}
+const asciiLogo=" ███████╗███████╗ ██████╗ ███╗   ███╗██╗███╗   ██╗██████╗ ██████╗ ███████╗\n ██╔════╝██╔════╝██╔════╝ ████╗ ████║██║████╗  ██║██╔══██╗╚════██╗██╔════╝\n ███████╗█████╗  ██║  ███╗██╔████╔██║██║██╔██╗ ██║██║  ██║ █████╔╝███████╗\n ╚════██║██╔══╝  ██║   ██║██║╚██╔╝██║██║██║╚██╗██║██║  ██║██╔═══╝ ╚════██║\n ███████║███████╗╚██████╔╝██║ ╚═╝ ██║██║██║ ╚████║██████╔╝███████╗███████║\n ╚══════╝╚══════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚══════╝";
+function welcome(){print('<pre class="ascii-logo" aria-hidden="true">'+esc(asciiLogo)+'</pre><span class="welcome">SegMind25</span>\n<span class="muted">Linux enthusiast. Content creator. Developer.</span>\n\nType <span class="accent">help</span> to see commands.');}
+
 // This filesystem lives only in memory, never on the visitor's device.
 function resolve(path='~'){
  if(path==='~')return root;if(path.startsWith('~/'))path=root+path.slice(1);if(!path.startsWith('/'))path=cwd+'/'+path;
@@ -137,13 +150,13 @@ const commands={
  history:()=>text(history.map((h,i)=>`${String(i+1).padStart(2)}  ${h}`).join('\n')),
  clear:()=>{output.replaceChildren();return null},
  home:()=>{output.replaceChildren();welcome();return null},
- exit:()=>{output.replaceChildren();cwd=root;updatePath();welcome();return null},
+ exit:()=>{closeSession();return null},
  resetfs:args=>{if(args[0]!=='confirm')return text('Run resetfs confirm to restore the virtual files.');fs=structuredClone(SEED);cwd=root;updatePath();return text('Virtual files restored.')},
  youtube:()=>link(links.gaming,'Gaming — @SegMind25')+'\n'+link(links.coding,'Coding — @SegError')
 };
 commands.socials=commands.contact;for(const [name,url]of Object.entries(links))commands[name]=()=>link(url,url);
 function execute(value){
- if(!value.trim())return;const before=shortPath();history.push(value);history=history.slice(-50);position=history.length;draft='';input.value='';$('#suggestions').replaceChildren();
+ if($('#closed').hidden===false||!value.trim())return;const before=shortPath();history.push(value);history=history.slice(-50);position=history.length;draft='';input.value='';$('#suggestions').replaceChildren();
  let result;try{const [name,...args]=parse(value.trim());result=Object.hasOwn(commands,name.toLowerCase())?commands[name.toLowerCase()](args):error('Command not found: '+name+'. Type help.')}catch(e){result=error(e.message)}
  if(result!==null){print(result,value);const echo=output.lastElementChild?.querySelector('.echo b');if(echo)echo.textContent=before+' $'}scroll();
 }
@@ -159,8 +172,31 @@ input.addEventListener('keydown',event=>{
  if(event.ctrlKey&&event.key.toLowerCase()==='l'){event.preventDefault();output.replaceChildren()}
  if(event.ctrlKey&&event.key.toLowerCase()==='c'){event.preventDefault();print('',input.value+'^C');input.value='';$('#suggestions').replaceChildren()}
 });
-document.addEventListener('keydown',event=>{if(event.key==='Escape'){$('#suggestions').replaceChildren();input.focus()}});
-screen.addEventListener('click',event=>{if(event.target===screen&&!getSelection().toString())input.focus()});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'){$('#suggestions').replaceChildren();if($('.terminal').classList.contains('expanded')){$('.terminal').classList.remove('expanded');syncFullscreen()}if($('#closed').hidden)input.focus()}});
+screen.addEventListener('click',event=>{if(event.target===screen&&$('#closed').hidden&&!getSelection().toString())input.focus()});
+// Exit closes this simulated session; reconnect restores the prompt.
+function closeSession(){
+ $('#suggestions').replaceChildren();input.value='';$('#form').hidden=true;$('#closed').hidden=false;
+ $('.terminal').classList.add('is-closed');$('#sessionStatus').textContent='Disconnected';
+ $('#announce').textContent='Session closed. Select Reconnect to continue.';$('#reconnect').focus();scroll();
+}
+function reconnect(){
+ output.replaceChildren();cwd=root;updatePath();$('#form').hidden=false;$('#closed').hidden=true;
+ $('.terminal').classList.remove('is-closed');$('#sessionStatus').textContent='Connected';welcome();input.focus();
+}
+function syncFullscreen(){
+ const active=!!document.fullscreenElement||$('.terminal').classList.contains('expanded');
+ $('#fullscreen').setAttribute('aria-pressed',String(active));$('#fullscreen').setAttribute('aria-label',active?'Exit fullscreen':'Enter fullscreen');
+ $('#fullscreen').title=active?'Exit fullscreen':'Fullscreen';
+ $('#fullscreen path').setAttribute('d',active?'M3 7h4V3m6 0v4h4M7 17v-4H3m10 4v-4h4':'M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4');
+}
+$('#fullscreen').onclick=async()=>{
+ const terminal=$('.terminal');
+ try{if(document.fullscreenElement)await document.exitFullscreen();else if(terminal.classList.contains('expanded'))terminal.classList.remove('expanded');else if(document.fullscreenEnabled&&terminal.requestFullscreen)await terminal.requestFullscreen();else terminal.classList.add('expanded')}
+ catch{terminal.classList.toggle('expanded')}syncFullscreen();
+};
+document.addEventListener('fullscreenchange',syncFullscreen);
+$('#exit').onclick=closeSession;$('#reconnect').onclick=reconnect;$('#year').textContent=new Date().getFullYear();
 welcome();if(matchMedia('(pointer:fine)').matches)input.focus({preventScroll:true});
 </script>
 </body>

@@ -1,7 +1,10 @@
 # SegMind25 — Simple Terminal Portfolio
 
-A small blue terminal with plain text output and a command prompt. No external
-libraries, cards, navigation tabs, games, audio, boot animation, or visual effects.
+A small blue terminal with an ASCII welcome banner, plain text output, and a command
+prompt. The title bar has minimal fullscreen and exit controls, and the footer
+shows the session state and copyright. A terminal favicon appears in the browser
+tab. Short entrance/output fades respect reduced-motion preferences. No external
+libraries, cards, navigation tabs, games, audio, or boot sequence.
 
 Open `index.html` directly in a browser. No build step or network access required.
 
@@ -12,7 +15,9 @@ Open `index.html` directly in a browser. No build step or network access require
 - Navigation: `ls [-la] [path]`, `cd [path]`, `pwd`, `tree`.
 - Virtual files: `cat [file]`, `touch [file]`, `mkdir [path]`, `rm [-r] [path]`.
 - Utilities: `help`, `echo`, `history`, `date`, `whoami`, `neofetch`, `clear`.
-- `home` clears the output and shows the welcome message; `exit` also resets the path.
+- `home` clears the output and shows the welcome message.
+- `exit` or the × button closes the simulated session; Reconnect restores the prompt.
+- Fullscreen uses the browser API where supported, with an expanded-layout fallback.
 - `resetfs confirm` restores the original virtual files.
 
 File operations only affect an in-memory simulation and reset on reload.
