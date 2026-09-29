@@ -3,7 +3,9 @@
 A small blue terminal with an ASCII welcome banner, plain text output, and a command
 prompt. The title bar has minimal fullscreen and exit controls, and the footer
 shows the session state and copyright. A terminal favicon appears in the browser
-tab. Short entrance/output fades respect reduced-motion preferences. No external
+tab. Short entrance/output fades respect reduced-motion preferences.
+A subtle blue cmatrix-style character rain runs behind the terminal. The pause
+button toggles it; it stops in hidden tabs and respects reduced-motion settings. No external
 libraries, cards, navigation tabs, games, audio, or boot sequence.
 
 Open `index.html` directly in a browser. No build step or network access required.

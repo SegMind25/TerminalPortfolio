@@ -28,11 +28,18 @@ a{color:var(--blue);text-underline-offset:3px}a:hover{color:#c0e1ff}a:focus-visi
 @keyframes terminal-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}@keyframes output-in{from{opacity:.45;transform:translateY(2px)}to{opacity:1;transform:none}}
 @media(max-width:600px){.titlebar{padding-block:calc(4px + env(safe-area-inset-top)) 4px;gap:9px}.icon-button{width:44px;height:44px}.terminal-footer{padding:9px 16px calc(9px + env(safe-area-inset-bottom));font-size:9px}#screen{padding-bottom:20px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/* Ambient character rain stays behind the usable terminal. */
+#matrix-rain{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.48}
+.terminal{position:relative;z-index:1;background:rgba(16,27,44,.94)}
+.terminal:fullscreen #matrix-rain{position:absolute;opacity:.12}.terminal:fullscreen>:not(#matrix-rain){position:relative;z-index:1}
+@media(max-width:600px){.terminal{background:rgba(16,27,44,.89)}}
+@media(prefers-reduced-motion:reduce){#matrix-rain{display:none}}
 </style>
 </head>
 <body>
+<canvas id="matrix-rain" aria-hidden="true"></canvas>
 <main class="terminal" aria-label="Portfolio terminal">
-<header class="titlebar"><span class="symbol" aria-hidden="true">&gt;_</span><span id="title">segmind@portfolio: ~</span><div class="window-controls"><button class="icon-button" id="fullscreen" type="button" aria-label="Enter fullscreen" title="Fullscreen" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4"/></svg></button><button class="icon-button exit" id="exit" type="button" aria-label="Exit terminal" title="Exit terminal"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button></div></header>
+<header class="titlebar"><span class="symbol" aria-hidden="true">&gt;_</span><span id="title">segmind@portfolio: ~</span><div class="window-controls"><button class="icon-button" id="motion" type="button" aria-label="Pause background motion" title="Pause background motion" aria-pressed="true"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5v10M13 5v10"/></svg></button><button class="icon-button" id="fullscreen" type="button" aria-label="Enter fullscreen" title="Fullscreen" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4m10-4h4v4M3 13v4h4m10-4v4h-4"/></svg></button><button class="icon-button exit" id="exit" type="button" aria-label="Exit terminal" title="Exit terminal"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button></div></header>
 <section id="screen" aria-label="Terminal history" tabindex="0">
 <div id="output"></div>
 <form id="form" autocomplete="off"><label class="prompt" for="input"><span>segmind</span>:<span id="path">~</span> $</label><input id="input" aria-label="Terminal command" spellcheck="false" autocapitalize="off" autocorrect="off" enterkeyhint="send"></form>
@@ -197,6 +204,47 @@ $('#fullscreen').onclick=async()=>{
 };
 document.addEventListener('fullscreenchange',syncFullscreen);
 $('#exit').onclick=closeSession;$('#reconnect').onclick=reconnect;$('#year').textContent=new Date().getFullYear();
+// Blue cmatrix-style rain: capped frame rate, no dependencies, and a pause control.
+(function matrixBackground(){
+ const canvas=$('#matrix-rain'),ctx=canvas.getContext('2d'),button=$('#motion');
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)'),glyphs='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ<>/{}[]#$%+=:;';
+ let enabled=true,frame=0,last=0,width=0,height=0,columns=[];
+ if(!ctx){canvas.remove();button.hidden=true;return}
+ function resize(){
+  width=innerWidth;height=innerHeight;const dpr=Math.min(devicePixelRatio||1,1.5);
+  canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+  const spacing=Math.max(20,width/85);
+  columns=Array.from({length:Math.ceil(width/spacing)},(_,i)=>({x:i*spacing,y:Math.random()*(height+400),speed:30+Math.random()*65,length:8+Math.floor(Math.random()*16),chars:Array.from({length:24},()=>glyphs[Math.floor(Math.random()*glyphs.length)])}));
+  draw(0);
+ }
+ function draw(delta){
+  ctx.clearRect(0,0,width,height);ctx.font='14px ui-monospace, Consolas, monospace';
+  for(const column of columns){
+   column.y+=column.speed*delta;if(column.y-column.length*18>height)column.y=-Math.random()*250;
+   if(Math.random()<.08)column.chars[Math.floor(Math.random()*column.length)]=glyphs[Math.floor(Math.random()*glyphs.length)];
+   for(let j=0;j<column.length;j++){const y=column.y-j*18;if(y<0||y>height+18)continue;ctx.globalAlpha=j===0?.9:Math.pow(1-j/column.length,1.6)*.62;ctx.fillStyle=j===0?'#b7ddff':'#529de7';ctx.fillText(column.chars[j],column.x,y)}
+  }
+  ctx.globalAlpha=1;
+ }
+ function tick(now){
+  if(!enabled||reduced.matches||document.hidden){frame=0;return}
+  if(!last)last=now;if(now-last>=1000/24){draw(Math.min((now-last)/1000,.1));last=now}
+  frame=requestAnimationFrame(tick);
+ }
+ function sync(){
+  cancelAnimationFrame(frame);frame=0;last=0;const active=enabled&&!reduced.matches;
+  canvas.hidden=!active;button.setAttribute('aria-pressed',String(active));
+  button.setAttribute('aria-label',active?'Pause background motion':'Enable background motion');button.title=reduced.matches?'Motion disabled by reduced-motion preference':button.getAttribute('aria-label');
+  button.disabled=reduced.matches;button.querySelector('path').setAttribute('d',active?'M7 5v10M13 5v10':'M7 4l8 6-8 6Z');
+  if(active&&!document.hidden)frame=requestAnimationFrame(tick);
+ }
+ button.onclick=()=>{enabled=!enabled;sync()};
+ window.addEventListener('resize',resize);document.addEventListener('visibilitychange',sync);reduced.addEventListener('change',sync);
+ document.addEventListener('fullscreenchange',()=>{if(document.fullscreenElement)document.fullscreenElement.prepend(canvas);else document.body.prepend(canvas);resize()});
+ window.addEventListener('pagehide',()=>cancelAnimationFrame(frame));window.addEventListener('pageshow',sync);
+ resize();sync();
+})();
+
 welcome();if(matchMedia('(pointer:fine)').matches)input.focus({preventScroll:true});
 </script>
 </body>
